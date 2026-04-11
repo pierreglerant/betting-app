@@ -30,7 +30,9 @@ export default function Login() {
       }
 
       await login(data);
-      router.replace('/');
+
+      router.replace('/home');
+
     } catch (e) {
       setErrorMessage('Erreur de connexion');
     } finally {
