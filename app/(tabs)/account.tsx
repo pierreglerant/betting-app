@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/auth-context';
+import { supabase } from '@/libs/supabase';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -12,7 +13,6 @@ import {
   Modal,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { supabase } from '@/libs/supabase';
 
 export default function Account() {
   const { user, logout, setUser } = useAuth();
@@ -62,6 +62,8 @@ export default function Account() {
   const pickAndUploadImage = async () => {
     if (!user) return;
 
+    await ImagePicker.requestMediaLibraryPermissionsAsync();
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -72,32 +74,44 @@ export default function Account() {
     if (result.canceled) return;
 
     const image = result.assets[0];
-    const response = await fetch(image.uri);
-    const blob = await response.blob();
 
-    const filePath = `${user.id}.png`;
+    const fileExt = image.uri.split('.').pop() || 'jpg';
+    const filePath = `${user.id}.${fileExt}`;
+    const mimeType = image.mimeType || `image/${fileExt === 'png' ? 'png' : 'jpeg'}`;
 
-    const { error } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, blob, {
-        upsert: true,
-        contentType: image.mimeType || 'image/jpeg',
-      });
+    try {
+      const response = await fetch(image.uri);
+      const blob = await response.blob();
+      const arrayBuffer = await blob.arrayBuffer();
 
-    if (error) return console.error(error);
+      const { error } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, arrayBuffer, {
+          upsert: true,
+          contentType: mimeType,
+        });
 
-    const { data } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
+      if (error) {
+        console.error('[avatar upload error]', error);
+        return;
+      }
 
-    const avatarUrl = data.publicUrl;
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
 
-    await supabase
-      .from('users')
-      .update({ avatar_url: avatarUrl })
-      .eq('id', user.id);
+      const avatarUrl = data.publicUrl;
 
-    await setUser({ ...user, avatar_url: avatarUrl });
+      await supabase
+        .from('users')
+        .update({ avatar_url: avatarUrl })
+        .eq('id', user.id);
+
+      await setUser({ ...user, avatar_url: avatarUrl });
+
+    } catch (e) {
+      console.error('[avatar upload crash]', e);
+    }
   };
 
   return (
@@ -109,10 +123,7 @@ export default function Account() {
       {user && (
         <View style={{ flex: 1 }}>
           
-          {/* Avatar */}
           <View style={{ alignItems: 'center', marginBottom: 20 }}>
-            
-            {/* IMAGE → fullscreen */}
             <Pressable onPress={() => setModalVisible(true)}>
               {user.avatar_url ? (
                 <Image
@@ -135,7 +146,6 @@ export default function Account() {
               )}
             </Pressable>
 
-            {/* BOUTON CHANGE */}
             <Pressable
               onPress={pickAndUploadImage}
               style={{
@@ -150,7 +160,6 @@ export default function Account() {
             </Pressable>
           </View>
 
-          {/* USERNAME */}
           <View
             style={{
               backgroundColor: '#f5f5f5',
@@ -186,7 +195,6 @@ export default function Account() {
             </Pressable>
           </View>
 
-          {/* LOGOUT */}
           <Pressable
             onPress={handleLogout}
             style={{
@@ -202,8 +210,7 @@ export default function Account() {
         </View>
       )}
 
-      {/* MODAL FULLSCREEN IMAGE */}
-      <Modal visible={modalVisible} transparent={true}>
+      <Modal visible={modalVisible} transparent>
         <Pressable
           onPress={() => setModalVisible(false)}
           style={{
