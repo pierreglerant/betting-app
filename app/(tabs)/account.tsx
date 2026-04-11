@@ -1,110 +1,247 @@
 import { useAuth } from '@/contexts/auth-context';
+import { supabase } from '@/libs/supabase';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, Text, View } from 'react-native';
+import {
+  Alert,
+  Platform,
+  Pressable,
+  Text,
+  View,
+  Image,
+  TextInput,
+  Modal,
+} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
 
 export default function Account() {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState(user?.username || '');
+  const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
 
   const performLogout = async () => {
-    console.log('[account] performLogout:start');
     setLoading(true);
     try {
       await logout();
-      console.log('[account] performLogout:logout resolved, redirecting to /login');
       router.replace('/login');
     } catch (error) {
-      console.error('[account] performLogout:error', error);
+      console.error('[logout:error]', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogout = async () => {
-    console.log('[account] handleLogout:prompt opened');
-
     if (Platform.OS === 'web') {
-      const confirmed = window.confirm('Es-tu sur de vouloir te deconnecter ?');
-      console.log('[account] handleLogout:web confirm =', confirmed);
-      if (confirmed) {
-        await performLogout();
-      }
+      const confirmed = window.confirm('Es-tu sur ?');
+      if (confirmed) await performLogout();
       return;
     }
 
-    Alert.alert('Déconnexion', 'Es-tu sûr de vouloir te déconnecter ?', [
-      {
-        text: 'Annuler',
-        onPress: () => {
-          console.log('[account] handleLogout:cancel pressed');
-        },
-        style: 'cancel',
-      },
-      {
-        text: 'Déconnexion',
-        onPress: async () => {
-          console.log('[account] handleLogout:confirm pressed');
-          await performLogout();
-        },
-        style: 'destructive',
-      },
+    Alert.alert('Déconnexion', 'Es-tu sûr ?', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Déconnexion', onPress: performLogout, style: 'destructive' },
     ]);
   };
 
+  const updateUsername = async () => {
+    if (!user) return;
+
+    const trimmed = username.trim();
+    if (!trimmed) return;
+
+    const { error } = await supabase
+      .from('users')
+      .update({ username: trimmed })
+      .eq('id', user.id);
+
+    if (error) {
+      console.error('[username update error]', error);
+      return;
+    }
+
+    await setUser({ ...user, username: trimmed });
+  };
+
+  const pickAndUploadImage = async () => {
+    if (!user) return;
+
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission refusée');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+      base64: true, // 🔥 IMPORTANT
+    });
+
+    if (result.canceled) return;
+
+    const image = result.assets[0];
+
+    if (!image.base64) {
+      console.error('[avatar] no base64 found');
+      return;
+    }
+
+    const mimeType = image.mimeType || 'image/jpeg';
+    const extension =
+      mimeType === 'image/png'
+        ? 'png'
+        : mimeType === 'image/webp'
+        ? 'webp'
+        : 'jpg';
+
+    const filePath = `${user.id}.${extension}`;
+
+    try {
+      const fileBuffer = decode(image.base64);
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, fileBuffer, {
+          upsert: true,
+          contentType: mimeType,
+        });
+
+      if (uploadError) {
+        console.error('[avatar upload error]', uploadError);
+        Alert.alert('Erreur upload');
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = data.publicUrl;
+
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ avatar_url: avatarUrl })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('[avatar db error]', updateError);
+        Alert.alert('Erreur DB');
+        return;
+      }
+
+      await setUser({ ...user, avatar_url: avatarUrl });
+
+    } catch (e) {
+      console.error('[avatar crash]', e);
+      Alert.alert('Erreur upload');
+    }
+  };
+
   return (
-    <View style={{ flex: 1, padding: 20, paddingTop: 40, backgroundColor: '#fff' }}>
-      <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 40, textAlign: 'center' }}>
+    <View style={{ flex: 1, padding: 20, paddingTop: 40 }}>
+      <Text style={{ fontSize: 28, textAlign: 'center', marginBottom: 30 }}>
         Mon Compte
       </Text>
 
-      {user ? (
+      {user && (
         <View style={{ flex: 1 }}>
-          <View
+          <View style={{ alignItems: 'center', marginBottom: 20 }}>
+            <Pressable onPress={() => setModalVisible(true)}>
+              {user.avatar_url ? (
+                <Image
+                  source={{ uri: user.avatar_url }}
+                  style={{ width: 100, height: 100, borderRadius: 50 }}
+                />
+              ) : (
+                <View
+                  style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 50,
+                    backgroundColor: '#ddd',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text>👤</Text>
+                </View>
+              )}
+            </Pressable>
+
+            <Pressable
+              onPress={pickAndUploadImage}
+              style={{
+                marginTop: 10,
+                padding: 10,
+                backgroundColor: '#2563eb',
+                borderRadius: 8,
+              }}
+            >
+              <Text style={{ color: 'white' }}>Changer la photo</Text>
+            </Pressable>
+          </View>
+
+          <TextInput
+            value={username}
+            onChangeText={setUsername}
             style={{
-              backgroundColor: '#f5f5f5',
-              padding: 20,
-              borderRadius: 12,
-              marginBottom: 30,
+              borderWidth: 1,
+              padding: 10,
+              marginBottom: 10,
+            }}
+          />
+
+          <Pressable
+            onPress={updateUsername}
+            style={{
+              backgroundColor: '#2563eb',
+              padding: 10,
+              borderRadius: 8,
+              alignItems: 'center',
             }}
           >
-            <Text style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>
-              Utilisateur connecté
-            </Text>
-            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#111' }}>
-              {user.username}
-            </Text>
-            {user.email && (
-              <Text style={{ fontSize: 14, color: '#666', marginTop: 8 }}>
-                {user.email}
-              </Text>
-            )}
-          </View>
+            <Text style={{ color: 'white' }}>Enregistrer</Text>
+          </Pressable>
 
           <Pressable
             onPress={handleLogout}
-            disabled={loading}
             style={{
-              backgroundColor: '#dc2626',
-              padding: 16,
-              borderRadius: 10,
+              backgroundColor: 'red',
+              padding: 10,
+              marginTop: 20,
               alignItems: 'center',
-              marginTop: 'auto',
-              marginBottom: 20,
-              opacity: loading ? 0.5 : 1,
             }}
           >
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '600' }}>
-              {loading ? 'Déconnexion...' : 'Se déconnecter'}
-            </Text>
+            <Text style={{ color: 'white' }}>Logout</Text>
           </Pressable>
         </View>
-      ) : (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ fontSize: 16, color: '#666' }}>Aucun utilisateur connecté</Text>
-        </View>
       )}
+
+      <Modal visible={modalVisible} transparent>
+        <Pressable
+          onPress={() => setModalVisible(false)}
+          style={{
+            flex: 1,
+            backgroundColor: 'black',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          {user?.avatar_url && (
+            <Image
+              source={{ uri: user.avatar_url }}
+              style={{ width: '90%', height: '60%' }}
+            />
+          )}
+        </Pressable>
+      </Modal>
     </View>
   );
 }
