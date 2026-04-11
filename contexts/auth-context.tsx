@@ -5,6 +5,7 @@ interface User {
   username: string;
   id: string;
   email?: string;
+  avatar_url?: string;
 }
 
 interface AuthContextType {
@@ -13,13 +14,30 @@ interface AuthContextType {
   isLoading: boolean;
   logout: () => Promise<void>;
   login: (user: User) => Promise<void>;
+  setUser: (user: User | null) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // 🔥 wrapper pour sync storage + state
+  const setUser = async (userData: User | null) => {
+    console.log('[auth] setUser:start', userData);
+
+    if (userData) {
+      await AsyncStorage.setItem('user', JSON.stringify(userData));
+      console.log('[auth] setUser:stored in AsyncStorage');
+    } else {
+      await AsyncStorage.removeItem('user');
+      console.log('[auth] setUser:removed from AsyncStorage');
+    }
+
+    setUserState(userData);
+    console.log('[auth] setUser:state updated');
+  };
 
   useEffect(() => {
     const initAuth = async () => {
@@ -27,8 +45,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const userData = await AsyncStorage.getItem('user');
         console.log('[auth] initAuth:storage user =', userData);
+
         if (userData) {
-          setUser(JSON.parse(userData));
+          const parsed = JSON.parse(userData);
+          setUserState(parsed);
           console.log('[auth] initAuth:setUser from storage');
         } else {
           console.log('[auth] initAuth:no user in storage');
@@ -46,22 +66,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (userData: User) => {
     console.log('[auth] login:start user =', userData?.username);
-    await AsyncStorage.setItem('user', JSON.stringify(userData));
-    const persistedUser = await AsyncStorage.getItem('user');
-    console.log('[auth] login:storage user after set =', persistedUser);
-    setUser(userData);
-    console.log('[auth] login:setUser done');
+    await setUser(userData);
+    console.log('[auth] login:done');
   };
 
   const logout = async () => {
     console.log('[auth] logout:start');
-    const before = await AsyncStorage.getItem('user');
-    console.log('[auth] logout:storage user before remove =', before);
-    await AsyncStorage.removeItem('user');
-    const after = await AsyncStorage.getItem('user');
-    console.log('[auth] logout:storage user after remove =', after);
-    setUser(null);
-    console.log('[auth] logout:setUser null done');
+    await setUser(null);
+    console.log('[auth] logout:done');
   };
 
   return (
@@ -72,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         logout,
         login,
+        setUser,
       }}
     >
       {children}
