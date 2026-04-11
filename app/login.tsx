@@ -1,17 +1,23 @@
 import { useState } from 'react';
 import { View, TextInput, Pressable, Text } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/libs/supabase';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!username) return;
+    if (!username) {
+      console.log('[login] handleLogin:blocked empty username');
+      return;
+    }
+
+    console.log('[login] handleLogin:start username =', username);
 
     setLoading(true);
     setErrorMessage('');
@@ -25,13 +31,15 @@ export default function Login() {
 
     // If user does not exist → show error
     if (error || !data) {
+      console.log('[login] handleLogin:user not found', { error });
       setErrorMessage('Pseudo introuvable');
       setLoading(false);
       return;
     }
 
-    // Store user locally (acts as session)
-    await AsyncStorage.setItem('user', JSON.stringify(data));
+    // Store user in context and AsyncStorage
+    await login(data);
+    console.log('[login] handleLogin:login resolved, redirecting to /');
 
     // Redirect to home screen
     router.replace('/');
