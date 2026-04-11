@@ -23,41 +23,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUserState] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 🔥 wrapper pour sync storage + state
   const setUser = async (userData: User | null) => {
     console.log('[auth] setUser:start', userData);
 
-    if (userData) {
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-      console.log('[auth] setUser:stored in AsyncStorage');
-    } else {
-      await AsyncStorage.removeItem('user');
-      console.log('[auth] setUser:removed from AsyncStorage');
-    }
+    try {
+      if (userData) {
+        await AsyncStorage.setItem('user', JSON.stringify(userData));
+        console.log('[auth] setUser:stored');
+      } else {
+        await AsyncStorage.removeItem('user');
+        console.log('[auth] setUser:removed');
+      }
 
-    setUserState(userData);
-    console.log('[auth] setUser:state updated');
+      setUserState(userData);
+      console.log('[auth] setUser:state updated');
+    } catch (e) {
+      console.error('[auth] setUser:error', e);
+    }
   };
 
   useEffect(() => {
     const initAuth = async () => {
       console.log('[auth] initAuth:start');
+
       try {
         const userData = await AsyncStorage.getItem('user');
-        console.log('[auth] initAuth:storage user =', userData);
+        console.log('[auth] raw storage:', userData);
 
-        if (userData) {
-          const parsed = JSON.parse(userData);
-          setUserState(parsed);
-          console.log('[auth] initAuth:setUser from storage');
-        } else {
-          console.log('[auth] initAuth:no user in storage');
+        if (!userData || userData === 'undefined') {
+          console.log('[auth] no valid user in storage');
+          return;
         }
+
+        let parsed: User;
+
+        try {
+          parsed = JSON.parse(userData);
+        } catch (e) {
+          console.error('[auth] JSON parse error → clearing storage');
+          await AsyncStorage.removeItem('user');
+          return;
+        }
+
+        const safeUser: User = {
+          id: parsed.id,
+          username: parsed.username,
+          email: parsed.email,
+          avatar_url: parsed.avatar_url ?? undefined,
+        };
+
+        setUserState(safeUser);
+        console.log('[auth] initAuth:setUser from storage', safeUser);
+
       } catch (e) {
         console.error('[auth] initAuth:error', e);
       } finally {
         setIsLoading(false);
-        console.log('[auth] initAuth:done isLoading=false');
+        console.log('[auth] initAuth:done');
       }
     };
 
@@ -65,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (userData: User) => {
-    console.log('[auth] login:start user =', userData?.username);
+    console.log('[auth] login:start', userData?.username);
     await setUser(userData);
     console.log('[auth] login:done');
   };

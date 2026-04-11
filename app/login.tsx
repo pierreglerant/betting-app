@@ -12,39 +12,30 @@ export default function Login() {
   const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!username) {
-      console.log('[login] handleLogin:blocked empty username');
-      return;
-    }
-
-    console.log('[login] handleLogin:start username =', username);
+    if (!username) return;
 
     setLoading(true);
     setErrorMessage('');
 
-    // Fetch user from database by username
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('username', username)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .single();
 
-    // If user does not exist → show error
-    if (error || !data) {
-      console.log('[login] handleLogin:user not found', { error });
-      setErrorMessage('Pseudo introuvable');
+      if (error || !data) {
+        setErrorMessage('Pseudo introuvable');
+        return;
+      }
+
+      await login(data);
+      router.replace('/');
+    } catch (e) {
+      setErrorMessage('Erreur de connexion');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Store user in context and AsyncStorage
-    await login(data);
-    console.log('[login] handleLogin:login resolved, redirecting to /');
-
-    // Redirect to home screen
-    router.replace('/');
-
-    setLoading(false);
   };
 
   return (
