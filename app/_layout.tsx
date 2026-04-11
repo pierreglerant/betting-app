@@ -25,8 +25,8 @@ function RootLayoutNav() {
       console.log('[layout] guard:redirect -> /login');
       router.replace('/login');
     } else if (isSignedIn && inAuthGroup) {
-      console.log('[layout] guard:redirect -> /(tabs)');
-      router.replace('/(tabs)');
+      console.log('[layout] guard:redirect -> /home');
+      router.replace('/home');
     } else {
       console.log('[layout] guard:no redirect');
     }
