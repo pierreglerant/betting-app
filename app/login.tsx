@@ -7,66 +7,58 @@ import { supabase } from '@/libs/supabase';
 export default function Login() {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
 
   const handleLogin = async () => {
     if (!username) return;
 
     setLoading(true);
+    setErrorMessage('');
 
-    // check si user existe
-    let { data, error } = await supabase
+    // Fetch user from database by username
+    const { data, error } = await supabase
       .from('users')
       .select('*')
       .eq('username', username)
       .single();
 
-    // si erreur "not found", on crée
-    if (error && error.code === 'PGRST116') {
-      const { data: newUser, error: insertError } = await supabase
-        .from('users')
-        .insert({ username })
-        .select()
-        .single();
-
-      if (insertError) {
-        console.log(insertError);
-        setLoading(false);
-        return;
-      }
-
-      data = newUser;
-    }
-
-    if (!data) {
-      console.log('Erreur récupération user');
+    // If user does not exist → show error
+    if (error || !data) {
+      setErrorMessage('Pseudo introuvable');
       setLoading(false);
       return;
     }
 
-    // stocker en local
+    // Store user locally (acts as session)
     await AsyncStorage.setItem('user', JSON.stringify(data));
 
-    // redirection vers l'app
+    // Redirect to home screen
     router.replace('/');
 
     setLoading(false);
   };
 
   return (
-    <View style={{ marginTop: 100, padding: 20 }}>
-      <Text style={{ fontSize: 24, marginBottom: 20 }}>
-        Bets & Binouzes 🍻
+    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+      <Text style={{ fontSize: 28, marginBottom: 30, textAlign: 'center' }}>
+        🍻 Bets & Binouzes
       </Text>
 
       <TextInput
         placeholder="Ton pseudo"
+        placeholderTextColor="#999"
         value={username}
         onChangeText={setUsername}
+        autoCapitalize="none"
         style={{
           borderWidth: 1,
-          padding: 12,
-          borderRadius: 8,
+          borderColor: '#ddd',
+          padding: 14,
+          borderRadius: 10,
+          backgroundColor: '#fff',
+          fontSize: 16,
+          color: 'black',
         }}
       />
 
@@ -74,17 +66,24 @@ export default function Login() {
         onPress={handleLogin}
         style={{
           marginTop: 20,
-          backgroundColor: 'black',
-          padding: 12,
-          borderRadius: 8,
+          backgroundColor: '#111',
+          padding: 14,
+          borderRadius: 10,
+          alignItems: 'center',
           opacity: loading ? 0.5 : 1,
         }}
         disabled={loading}
       >
-        <Text style={{ color: 'white', textAlign: 'center' }}>
+        <Text style={{ color: 'white', fontSize: 16 }}>
           {loading ? 'Connexion...' : 'Entrer'}
         </Text>
       </Pressable>
+
+      {errorMessage ? (
+        <Text style={{ color: 'red', marginTop: 10, textAlign: 'center' }}>
+          {errorMessage}
+        </Text>
+      ) : null}
     </View>
   );
 }
