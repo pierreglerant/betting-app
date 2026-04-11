@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { View, Text, Pressable, Alert, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/auth-context';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Platform, Pressable, Text, View } from 'react-native';
 
 export default function Account() {
   const { user, logout } = useAuth();

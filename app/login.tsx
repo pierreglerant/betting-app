@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { View, TextInput, Pressable, Text } from 'react-native';
-import { useRouter } from 'expo-router';
-import { supabase } from '@/libs/supabase';
 import { useAuth } from '@/contexts/auth-context';
+import { supabase } from '@/libs/supabase';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 export default function Login() {
   const [username, setUsername] = useState('');
