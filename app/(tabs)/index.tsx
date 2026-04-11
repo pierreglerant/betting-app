@@ -10,34 +10,38 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const storedUser = await AsyncStorage.getItem('user');
+      try {
+        const storedUser = await AsyncStorage.getItem('user');
 
-      if (!storedUser) {
+        if (!storedUser) {
+          router.replace('/login');
+        } else {
+          const user = JSON.parse(storedUser);
+          setUsername(user.username);
+        }
+      } catch (e) {
+        console.log(e);
         router.replace('/login');
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      const user = JSON.parse(storedUser);
-      setUsername(user.username);
-
-      setLoading(false);
     };
 
     checkUser();
   }, []);
 
   if (loading) {
-    return <Text style={{ marginTop: 100 }}>Loading...</Text>;
+    return (
+      <View style={{ marginTop: 100 }}>
+        <Text>Chargement...</Text>
+      </View>
+    );
   }
 
   return (
-    <View style={{ marginTop: 100, padding: 20 }}>
+    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
       <Text style={{ fontSize: 24 }}>
         Bienvenue {username} 🍻
-      </Text>
-
-      <Text style={{ marginTop: 20 }}>
-        Tu peux maintenant créer des paris 👇
       </Text>
     </View>
   );
