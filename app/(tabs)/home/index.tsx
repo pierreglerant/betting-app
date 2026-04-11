@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
+import OpenBetsScreen from './openBets';
 
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ export default function HomeScreen() {
     };
 
     checkUser();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (
@@ -43,6 +44,7 @@ export default function HomeScreen() {
       <Text style={{ fontSize: 24 }}>
         Bienvenue {username} 🍻
       </Text>
+      <OpenBetsScreen />
     </View>
   );
 }
