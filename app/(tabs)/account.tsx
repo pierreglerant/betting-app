@@ -13,6 +13,8 @@ import {
   Modal,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
 
 export default function Account() {
   const { user, logout, setUser } = useAuth();
@@ -35,7 +37,7 @@ export default function Account() {
 
   const handleLogout = async () => {
     if (Platform.OS === 'web') {
-      const confirmed = window.confirm('Es-tu sur de vouloir te deconnecter ?');
+      const confirmed = window.confirm('Es-tu sur ?');
       if (confirmed) await performLogout();
       return;
     }
@@ -49,50 +51,71 @@ export default function Account() {
   const updateUsername = async () => {
     if (!user) return;
 
+    const trimmed = username.trim();
+    if (!trimmed) return;
+
     const { error } = await supabase
       .from('users')
-      .update({ username })
+      .update({ username: trimmed })
       .eq('id', user.id);
 
-    if (error) return console.error(error);
+    if (error) {
+      console.error('[username update error]', error);
+      return;
+    }
 
-    await setUser({ ...user, username });
+    await setUser({ ...user, username: trimmed });
   };
 
   const pickAndUploadImage = async () => {
     if (!user) return;
 
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission refusée');
+      return;
+    }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.7,
+      base64: true, // 🔥 IMPORTANT
     });
 
     if (result.canceled) return;
 
     const image = result.assets[0];
 
-    const fileExt = image.uri.split('.').pop() || 'jpg';
-    const filePath = `${user.id}.${fileExt}`;
-    const mimeType = image.mimeType || `image/${fileExt === 'png' ? 'png' : 'jpeg'}`;
+    if (!image.base64) {
+      console.error('[avatar] no base64 found');
+      return;
+    }
+
+    const mimeType = image.mimeType || 'image/jpeg';
+    const extension =
+      mimeType === 'image/png'
+        ? 'png'
+        : mimeType === 'image/webp'
+        ? 'webp'
+        : 'jpg';
+
+    const filePath = `${user.id}.${extension}`;
 
     try {
-      const response = await fetch(image.uri);
-      const blob = await response.blob();
-      const arrayBuffer = await blob.arrayBuffer();
+      const fileBuffer = decode(image.base64);
 
-      const { error } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, arrayBuffer, {
+        .upload(filePath, fileBuffer, {
           upsert: true,
           contentType: mimeType,
         });
 
-      if (error) {
-        console.error('[avatar upload error]', error);
+      if (uploadError) {
+        console.error('[avatar upload error]', uploadError);
+        Alert.alert('Erreur upload');
         return;
       }
 
@@ -102,27 +125,33 @@ export default function Account() {
 
       const avatarUrl = data.publicUrl;
 
-      await supabase
+      const { error: updateError } = await supabase
         .from('users')
         .update({ avatar_url: avatarUrl })
         .eq('id', user.id);
 
+      if (updateError) {
+        console.error('[avatar db error]', updateError);
+        Alert.alert('Erreur DB');
+        return;
+      }
+
       await setUser({ ...user, avatar_url: avatarUrl });
 
     } catch (e) {
-      console.error('[avatar upload crash]', e);
+      console.error('[avatar crash]', e);
+      Alert.alert('Erreur upload');
     }
   };
 
   return (
-    <View style={{ flex: 1, padding: 20, paddingTop: 40, backgroundColor: '#fff' }}>
-      <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 30, textAlign: 'center' }}>
+    <View style={{ flex: 1, padding: 20, paddingTop: 40 }}>
+      <Text style={{ fontSize: 28, textAlign: 'center', marginBottom: 30 }}>
         Mon Compte
       </Text>
 
       {user && (
         <View style={{ flex: 1 }}>
-          
           <View style={{ alignItems: 'center', marginBottom: 20 }}>
             <Pressable onPress={() => setModalVisible(true)}>
               {user.avatar_url ? (
@@ -150,8 +179,7 @@ export default function Account() {
               onPress={pickAndUploadImage}
               style={{
                 marginTop: 10,
-                paddingHorizontal: 16,
-                paddingVertical: 8,
+                padding: 10,
                 backgroundColor: '#2563eb',
                 borderRadius: 8,
               }}
@@ -160,52 +188,38 @@ export default function Account() {
             </Pressable>
           </View>
 
-          <View
+          <TextInput
+            value={username}
+            onChangeText={setUsername}
             style={{
-              backgroundColor: '#f5f5f5',
-              padding: 20,
-              borderRadius: 12,
-              marginBottom: 30,
+              borderWidth: 1,
+              padding: 10,
+              marginBottom: 10,
+            }}
+          />
+
+          <Pressable
+            onPress={updateUsername}
+            style={{
+              backgroundColor: '#2563eb',
+              padding: 10,
+              borderRadius: 8,
+              alignItems: 'center',
             }}
           >
-            <Text style={{ marginBottom: 8 }}>Username</Text>
-
-            <TextInput
-              value={username}
-              onChangeText={setUsername}
-              style={{
-                borderWidth: 1,
-                borderColor: '#ccc',
-                borderRadius: 10,
-                padding: 12,
-                marginBottom: 10,
-              }}
-            />
-
-            <Pressable
-              onPress={updateUsername}
-              style={{
-                backgroundColor: '#2563eb',
-                padding: 10,
-                borderRadius: 8,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: 'white' }}>Enregistrer</Text>
-            </Pressable>
-          </View>
+            <Text style={{ color: 'white' }}>Enregistrer</Text>
+          </Pressable>
 
           <Pressable
             onPress={handleLogout}
             style={{
-              backgroundColor: '#dc2626',
-              padding: 16,
-              borderRadius: 10,
+              backgroundColor: 'red',
+              padding: 10,
+              marginTop: 20,
               alignItems: 'center',
-              marginTop: 'auto',
             }}
           >
-            <Text style={{ color: 'white' }}>Se déconnecter</Text>
+            <Text style={{ color: 'white' }}>Logout</Text>
           </Pressable>
         </View>
       )}
@@ -215,7 +229,7 @@ export default function Account() {
           onPress={() => setModalVisible(false)}
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.9)',
+            backgroundColor: 'black',
             justifyContent: 'center',
             alignItems: 'center',
           }}
@@ -223,7 +237,7 @@ export default function Account() {
           {user?.avatar_url && (
             <Image
               source={{ uri: user.avatar_url }}
-              style={{ width: '90%', height: '60%', resizeMode: 'contain' }}
+              style={{ width: '90%', height: '60%' }}
             />
           )}
         </Pressable>
