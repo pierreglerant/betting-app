@@ -127,3 +127,22 @@ export function useUserStatisticsData(userId: string | undefined) {
 
   return { stats, reload };
 }
+
+export function useUserPointsNumber(userId: string | undefined) {
+  const [points, setPoints] = useState(0);
+
+  const reload = useCallback(async () => {
+    if (!userId) return;
+
+    const { data, error } = await supabase.from('users').select('points').eq('id', userId).single();
+
+    if (error) {
+      console.error('Error fetching user points:', error);
+      return;
+    }
+
+    setPoints(data?.points || 0);
+  }, [userId]);
+
+  return { points, reload };
+}
