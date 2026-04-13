@@ -1,6 +1,19 @@
+import { colors } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/contexts/auth-context';
+import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
+import {
+  Manrope_400Regular,
+  Manrope_500Medium,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+  Manrope_800ExtraBold,
+  useFonts,
+} from '@expo-google-fonts/manrope';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+
+SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const { isSignedIn, isLoading } = useAuth();
@@ -32,10 +45,38 @@ function RootLayoutNav() {
     }
   }, [isSignedIn, segments, isLoading, router]);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    />
+  );
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    BebasNeue_400Regular,
+    Manrope_400Regular,
+    Manrope_500Medium,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+    Manrope_800ExtraBold,
+  });
+
+  useEffect(() => {
+    if (!fontsLoaded) {
+      return;
+    }
+
+    SplashScreen.hideAsync();
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <AuthProvider>
       <RootLayoutNav />

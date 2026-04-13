@@ -1,17 +1,11 @@
-import React from "react";
-import {
-  Text,
-  TextInput,
-  Button,
-  Platform,
-  ScrollView,
-  Pressable,
-  View,
-} from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import BaseModal from "./BaseModal";
-import { supabase } from "@/libs/supabase";
-import { UserLite } from "../types";
+import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
+import { supabase } from '@/libs/supabase';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React from 'react';
+import { Button, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { UserLite } from '../types';
+import BaseModal from './BaseModal';
 
 type CreateBetModalProps = {
   visible: boolean;
@@ -28,8 +22,8 @@ export default function CreateBetModal({
   users,
   onCreated,
 }: CreateBetModalProps) {
-  const [newTitle, setNewTitle] = React.useState("");
-  const [newContext, setNewContext] = React.useState("");
+  const [newTitle, setNewTitle] = React.useState('');
+  const [newContext, setNewContext] = React.useState('');
   const [deadline, setDeadline] = React.useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = React.useState(false);
   const [selectedUsers, setSelectedUsers] = React.useState<string[]>([]);
@@ -39,8 +33,8 @@ export default function CreateBetModal({
   });
 
   const resetForm = () => {
-    setNewTitle("");
-    setNewContext("");
+    setNewTitle('');
+    setNewContext('');
     setDeadline(null);
     setSelectedUsers([]);
     setErrors({ title: false, context: false });
@@ -54,9 +48,7 @@ export default function CreateBetModal({
 
   const toggleUser = (userId: string) => {
     setSelectedUsers((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId],
     );
   };
 
@@ -72,19 +64,19 @@ export default function CreateBetModal({
     if (titleError || contextError) return;
 
     const { data: bet, error } = await supabase
-      .from("bets")
+      .from('bets')
       .insert({
         title: newTitle.trim(),
         context: newContext.trim(),
         deadline: deadline ? deadline.toISOString() : null,
         creator_id: creatorId,
-        status: "open",
+        status: 'open',
       })
       .select()
       .single();
 
     if (error || !bet) {
-      console.error("Error creating bet:", error);
+      console.error('Error creating bet:', error);
       return;
     }
 
@@ -94,10 +86,10 @@ export default function CreateBetModal({
         user_id: userId,
       }));
 
-      const { error: tagsError } = await supabase.from("bet_tags").insert(tags);
+      const { error: tagsError } = await supabase.from('bet_tags').insert(tags);
 
       if (tagsError) {
-        console.error("Error creating bet tags:", tagsError);
+        console.error('Error creating bet tags:', tagsError);
       }
     }
 
@@ -108,7 +100,7 @@ export default function CreateBetModal({
 
   return (
     <BaseModal visible={visible} onClose={handleClose}>
-      <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
+      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.display }}>
         Créer un pari
       </Text>
 
@@ -118,11 +110,15 @@ export default function CreateBetModal({
         onChangeText={setNewTitle}
         style={{
           borderWidth: 1,
-          borderColor: errors.title ? "red" : "#ccc",
+          borderColor: errors.title ? colors.danger : colors.border,
           padding: 10,
           marginBottom: 10,
           borderRadius: 8,
+          backgroundColor: colors.cardSoft,
+          color: colors.text,
+          fontFamily: fonts.regular,
         }}
+        placeholderTextColor={colors.textMuted}
       />
 
       <TextInput
@@ -132,25 +128,30 @@ export default function CreateBetModal({
         multiline
         style={{
           borderWidth: 1,
-          borderColor: errors.context ? "red" : "#ccc",
+          borderColor: errors.context ? colors.danger : colors.border,
           padding: 10,
           height: 80,
           marginBottom: 10,
           borderRadius: 8,
-          textAlignVertical: "top",
+          textAlignVertical: 'top',
+          backgroundColor: colors.cardSoft,
+          color: colors.text,
+          fontFamily: fonts.regular,
         }}
+        placeholderTextColor={colors.textMuted}
       />
 
       <Button
-        title={deadline ? deadline.toLocaleDateString() : "Choisir une date"}
+        title={deadline ? deadline.toLocaleDateString() : 'Choisir une date'}
         onPress={() => setShowDatePicker(true)}
+        color={colors.primary}
       />
 
       {showDatePicker ? (
         <DateTimePicker
           value={deadline || new Date()}
           mode="date"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={(event, date) => {
             setShowDatePicker(false);
             if (date) setDeadline(date);
@@ -158,7 +159,14 @@ export default function CreateBetModal({
         />
       ) : null}
 
-      <Text style={{ marginTop: 15, marginBottom: 5 }}>
+      <Text
+        style={{
+          marginTop: 15,
+          marginBottom: 5,
+          color: colors.textMuted,
+          fontFamily: fonts.medium,
+        }}
+      >
         Participants à exclure
       </Text>
 
@@ -173,11 +181,16 @@ export default function CreateBetModal({
               style={{
                 padding: 10,
                 marginBottom: 5,
-                backgroundColor: selected ? "#2563eb" : "#eee",
+                backgroundColor: selected ? colors.primary : colors.cardSoft,
                 borderRadius: 8,
               }}
             >
-              <Text style={{ color: selected ? "white" : "black" }}>
+              <Text
+                style={{
+                  color: selected ? colors.text : colors.textMuted,
+                  fontFamily: selected ? fonts.semiBold : fonts.regular,
+                }}
+              >
                 {u.username}
               </Text>
             </Pressable>
@@ -186,7 +199,7 @@ export default function CreateBetModal({
       </ScrollView>
 
       <View style={{ marginTop: 15 }}>
-        <Button title="Créer" onPress={handleCreateBet} />
+        <Button title="Créer" onPress={handleCreateBet} color={colors.primary} />
       </View>
     </BaseModal>
   );

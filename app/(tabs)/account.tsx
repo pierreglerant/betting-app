@@ -1,20 +1,12 @@
+import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
 import { supabase } from '@/libs/supabase';
+import { decode } from 'base64-arraybuffer';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import {
-  Alert,
-  Platform,
-  Pressable,
-  Text,
-  View,
-  Image,
-  TextInput,
-  Modal,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
-import { decode } from 'base64-arraybuffer';
+import { Alert, Image, Modal, Platform, Pressable, Text, TextInput, View } from 'react-native';
 
 export default function Account() {
   const { user, logout, setUser } = useAuth();
@@ -54,10 +46,7 @@ export default function Account() {
     const trimmed = username.trim();
     if (!trimmed) return;
 
-    const { error } = await supabase
-      .from('users')
-      .update({ username: trimmed })
-      .eq('id', user.id);
+    const { error } = await supabase.from('users').update({ username: trimmed }).eq('id', user.id);
 
     if (error) {
       console.error('[username update error]', error);
@@ -94,12 +83,7 @@ export default function Account() {
     }
 
     const mimeType = image.mimeType || 'image/jpeg';
-    const extension =
-      mimeType === 'image/png'
-        ? 'png'
-        : mimeType === 'image/webp'
-        ? 'webp'
-        : 'jpg';
+    const extension = mimeType === 'image/png' ? 'png' : mimeType === 'image/webp' ? 'webp' : 'jpg';
 
     const filePath = `${user.id}.${extension}`;
 
@@ -119,9 +103,7 @@ export default function Account() {
         return;
       }
 
-      const { data } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
 
       const avatarUrl = data.publicUrl;
 
@@ -137,7 +119,6 @@ export default function Account() {
       }
 
       await setUser({ ...user, avatar_url: avatarUrl });
-
     } catch (e) {
       console.error('[avatar crash]', e);
       Alert.alert('Erreur upload');
@@ -145,8 +126,16 @@ export default function Account() {
   };
 
   return (
-    <View style={{ flex: 1, padding: 20, paddingTop: 40 }}>
-      <Text style={{ fontSize: 28, textAlign: 'center', marginBottom: 30 }}>
+    <View style={{ flex: 1, padding: 20, paddingTop: 40, backgroundColor: colors.background }}>
+      <Text
+        style={{
+          fontSize: 28,
+          textAlign: 'center',
+          marginBottom: 30,
+          color: colors.text,
+          fontFamily: fonts.display,
+        }}
+      >
         Mon Compte
       </Text>
 
@@ -165,12 +154,12 @@ export default function Account() {
                     width: 100,
                     height: 100,
                     borderRadius: 50,
-                    backgroundColor: '#ddd',
+                    backgroundColor: colors.cardSoft,
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}
                 >
-                  <Text>👤</Text>
+                  <Text style={{ fontFamily: fonts.medium }}>👤</Text>
                 </View>
               )}
             </Pressable>
@@ -180,11 +169,13 @@ export default function Account() {
               style={{
                 marginTop: 10,
                 padding: 10,
-                backgroundColor: '#2563eb',
+                backgroundColor: colors.primary,
                 borderRadius: 8,
               }}
             >
-              <Text style={{ color: 'white' }}>Changer la photo</Text>
+              <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>
+                Changer la photo
+              </Text>
             </Pressable>
           </View>
 
@@ -193,33 +184,44 @@ export default function Account() {
             onChangeText={setUsername}
             style={{
               borderWidth: 1,
+              borderColor: colors.border,
+              color: colors.text,
+              backgroundColor: colors.card,
+              borderRadius: 8,
               padding: 10,
               marginBottom: 10,
+              fontFamily: fonts.regular,
             }}
+            placeholderTextColor={colors.textMuted}
           />
 
           <Pressable
             onPress={updateUsername}
             style={{
-              backgroundColor: '#2563eb',
+              backgroundColor: colors.primary,
               padding: 10,
               borderRadius: 8,
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: 'white' }}>Enregistrer</Text>
+            <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>Enregistrer</Text>
           </Pressable>
 
           <Pressable
             onPress={handleLogout}
             style={{
-              backgroundColor: 'red',
+              backgroundColor: colors.danger,
               padding: 10,
               marginTop: 20,
+              borderRadius: 8,
               alignItems: 'center',
+              opacity: loading ? 0.5 : 1,
             }}
+            disabled={loading}
           >
-            <Text style={{ color: 'white' }}>Logout</Text>
+            <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>
+              {loading ? 'Déconnexion...' : 'Logout'}
+            </Text>
           </Pressable>
         </View>
       )}
@@ -229,16 +231,13 @@ export default function Account() {
           onPress={() => setModalVisible(false)}
           style={{
             flex: 1,
-            backgroundColor: 'black',
+            backgroundColor: 'rgba(0,0,0,0.8)',
             justifyContent: 'center',
             alignItems: 'center',
           }}
         >
           {user?.avatar_url && (
-            <Image
-              source={{ uri: user.avatar_url }}
-              style={{ width: '90%', height: '60%' }}
-            />
+            <Image source={{ uri: user.avatar_url }} style={{ width: '90%', height: '60%' }} />
           )}
         </Pressable>
       </Modal>

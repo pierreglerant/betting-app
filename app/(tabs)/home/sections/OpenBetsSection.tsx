@@ -1,12 +1,12 @@
-import React from "react";
-import { View, Text, Pressable } from "react-native";
-import { supabase } from "@/libs/supabase";
-import { Bet, BetUserStatus, UserLite } from "../types";
-import SectionHeader from "../components/SectionHeader";
-import BetRow from "../components/BetRow";
-import BetStatusBadge from "../components/BetStatusBadge";
-import CreateBetModal from "../components/CreateBetModal";
-import PredictBetModal from "../components/PredictBetModal";
+import { supabase } from '@/libs/supabase';
+import React from 'react';
+import { Pressable } from 'react-native';
+import BetRow from '../components/BetRow';
+import BetsSection from '../components/BetsSection';
+import BetStatusBadge from '../components/BetStatusBadge';
+import CreateBetModal from '../components/CreateBetModal';
+import PredictBetModal from '../components/PredictBetModal';
+import { Bet, BetUserStatus, UserLite } from '../types';
 
 type OpenBetsSectionProps = {
   userId: string;
@@ -27,68 +27,68 @@ export default function OpenBetsSection({
   const [predictionModalVisible, setPredictionModalVisible] = React.useState(false);
   const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);
 
-  const fetchOpenBets = async () => {
+  const fetchOpenBets = React.useCallback(async () => {
     const { data, error } = await supabase
-      .from("bets")
-      .select("*")
-      .eq("status", "open")
-      .order("created_at", { ascending: false });
+      .from('bets')
+      .select('*')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Error fetching open bets:", error);
+      console.error('Error fetching open bets:', error);
       return;
     }
 
     setOpenBets(data || []);
-  };
+  }, []);
 
-  const fetchUsers = async () => {
-    const { data, error } = await supabase.from("users").select("id, username");
+  const fetchUsers = React.useCallback(async () => {
+    const { data, error } = await supabase.from('users').select('id, username');
 
     if (error) {
-      console.error("Error fetching users:", error);
+      console.error('Error fetching users:', error);
       return;
     }
 
     setUsers(data || []);
-  };
+  }, []);
 
-  const fetchUserStatus = async () => {
+  const fetchUserStatus = React.useCallback(async () => {
     const { data: excluded, error: excludedError } = await supabase
-      .from("bet_tags")
-      .select("bet_id")
-      .eq("user_id", userId);
+      .from('bet_tags')
+      .select('bet_id')
+      .eq('user_id', userId);
 
     const { data: predicted, error: predictedError } = await supabase
-      .from("predictions")
-      .select("bet_id")
-      .eq("user_id", userId);
+      .from('predictions')
+      .select('bet_id')
+      .eq('user_id', userId);
 
     if (excludedError) {
-      console.error("Error fetching excluded bets:", excludedError);
+      console.error('Error fetching excluded bets:', excludedError);
     }
 
     if (predictedError) {
-      console.error("Error fetching predictions:", predictedError);
+      console.error('Error fetching predictions:', predictedError);
     }
 
     setExcludedSet(new Set((excluded || []).map((e) => e.bet_id)));
     setPredictedSet(new Set((predicted || []).map((p) => p.bet_id)));
-  };
-
-  const loadAll = async () => {
-    await Promise.all([fetchOpenBets(), fetchUsers(), fetchUserStatus()]);
-  };
+  }, [userId]);
 
   React.useEffect(() => {
+    const loadAll = async () => {
+      await Promise.all([fetchOpenBets(), fetchUsers(), fetchUserStatus()]);
+    };
+
     loadAll();
-  }, [userId, refreshKey]);
+  }, [fetchOpenBets, fetchUsers, fetchUserStatus, refreshKey]);
 
   const getStatus = (bet: Bet): BetUserStatus => {
-    if (excludedSet.has(bet.id)) return "excluded";
-    if (predictedSet.has(bet.id)) return "done";
-    if (bet.deadline && new Date(bet.deadline) < new Date()) return "late";
-    return "pending";
+    if (excludedSet.has(bet.id)) return 'excluded';
+    if (predictedSet.has(bet.id)) return 'done';
+    if (bet.deadline && new Date(bet.deadline) < new Date()) return 'late';
+    return 'pending';
   };
 
   const handleCreated = () => {
@@ -105,7 +105,7 @@ export default function OpenBetsSection({
   const renderRightElement = (bet: Bet) => {
     const status = getStatus(bet);
 
-    if (status === "pending") {
+    if (status === 'pending') {
       return (
         <Pressable
           onPress={() => {
@@ -122,27 +122,18 @@ export default function OpenBetsSection({
   };
 
   return (
-    <View
-      style={{
-        backgroundColor: "#fff",
-        padding: 20,
-        borderRadius: 12,
-        marginBottom: 20,
-      }}
-    >
-      <SectionHeader
+    <>
+      <BetsSection
         title="Paris en cours"
         rightElement={
           <Pressable onPress={() => setCreateModalVisible(true)}>
             <BetStatusBadge status="manage" />
           </Pressable>
         }
-      />
-
-      {openBets.length === 0 ? (
-        <Text>Aucun pari en cours</Text>
-      ) : (
-        openBets.map((bet) => (
+        isEmpty={openBets.length === 0}
+        emptyMessage="Aucun pari en cours"
+      >
+        {openBets.map((bet) => (
           <BetRow
             key={bet.id}
             title={bet.title}
@@ -150,8 +141,8 @@ export default function OpenBetsSection({
             deadline={bet.deadline}
             rightElement={renderRightElement(bet)}
           />
-        ))
-      )}
+        ))}
+      </BetsSection>
 
       <CreateBetModal
         visible={createModalVisible}
@@ -171,6 +162,6 @@ export default function OpenBetsSection({
         }}
         onPredicted={handlePredicted}
       />
-    </View>
+    </>
   );
 }

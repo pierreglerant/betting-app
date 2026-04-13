@@ -1,3 +1,5 @@
+import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
 import { supabase } from '@/libs/supabase';
 import { useRouter } from 'expo-router';
@@ -32,8 +34,7 @@ export default function Login() {
       await login(data);
 
       router.replace('/home');
-
-    } catch (e) {
+    } catch {
       setErrorMessage('Erreur de connexion');
     } finally {
       setLoading(false);
@@ -41,25 +42,36 @@ export default function Login() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 28, marginBottom: 30, textAlign: 'center' }}>
-        🍻 Bets & Binouzes
+    <View
+      style={{ flex: 1, justifyContent: 'center', padding: 20, backgroundColor: colors.background }}
+    >
+      <Text
+        style={{
+          fontSize: 28,
+          marginBottom: 30,
+          textAlign: 'center',
+          color: colors.text,
+          fontFamily: fonts.display,
+        }}
+      >
+        Bets & Binouzes
       </Text>
 
       <TextInput
         placeholder="Ton pseudo"
-        placeholderTextColor="#999"
+        placeholderTextColor={colors.textMuted}
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
         style={{
           borderWidth: 1,
-          borderColor: '#ddd',
+          borderColor: colors.border,
           padding: 14,
           borderRadius: 10,
-          backgroundColor: '#fff',
+          backgroundColor: colors.card,
           fontSize: 16,
-          color: 'black',
+          color: colors.text,
+          fontFamily: fonts.regular,
         }}
       />
 
@@ -67,7 +79,7 @@ export default function Login() {
         onPress={handleLogin}
         style={{
           marginTop: 20,
-          backgroundColor: '#111',
+          backgroundColor: colors.primary,
           padding: 14,
           borderRadius: 10,
           alignItems: 'center',
@@ -75,13 +87,20 @@ export default function Login() {
         }}
         disabled={loading}
       >
-        <Text style={{ color: 'white', fontSize: 16 }}>
+        <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.semiBold }}>
           {loading ? 'Connexion...' : 'Entrer'}
         </Text>
       </Pressable>
 
       {errorMessage ? (
-        <Text style={{ color: 'red', marginTop: 10, textAlign: 'center' }}>
+        <Text
+          style={{
+            color: colors.danger,
+            marginTop: 10,
+            textAlign: 'center',
+            fontFamily: fonts.medium,
+          }}
+        >
           {errorMessage}
         </Text>
       ) : null}

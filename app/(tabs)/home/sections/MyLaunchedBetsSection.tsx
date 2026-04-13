@@ -1,11 +1,11 @@
-import React from "react";
-import { View, Text, Pressable } from "react-native";
-import { supabase } from "@/libs/supabase";
-import { Bet } from "../types";
-import SectionHeader from "../components/SectionHeader";
-import BetRow from "../components/BetRow";
-import BetStatusBadge from "../components/BetStatusBadge";
-import ResolveBetModal from "../components/ResolveBetModal";
+import { supabase } from '@/libs/supabase';
+import React from 'react';
+import { Pressable } from 'react-native';
+import BetRow from '../components/BetRow';
+import BetsSection from '../components/BetsSection';
+import BetStatusBadge from '../components/BetStatusBadge';
+import ResolveBetModal from '../components/ResolveBetModal';
+import { Bet } from '../types';
 
 type MyLaunchedBetsSectionProps = {
   userId: string;
@@ -22,25 +22,29 @@ export default function MyLaunchedBetsSection({
   const [manageModalVisible, setManageModalVisible] = React.useState(false);
   const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);
 
-  const fetchMyLaunchedBets = async () => {
+  const fetchMyLaunchedBets = React.useCallback(async () => {
     const { data, error } = await supabase
-      .from("bets")
-      .select("*")
-      .eq("creator_id", userId)
-      .eq("status", "open")
-      .order("created_at", { ascending: false });
+      .from('bets')
+      .select('*')
+      .eq('creator_id', userId)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Error fetching my launched bets:", error);
+      console.error('Error fetching my launched bets:', error);
       return;
     }
 
     setBets(data || []);
-  };
+  }, [userId]);
 
   React.useEffect(() => {
-    fetchMyLaunchedBets();
-  }, [userId, refreshKey]);
+    const loadMyLaunchedBets = async () => {
+      await fetchMyLaunchedBets();
+    };
+
+    loadMyLaunchedBets();
+  }, [fetchMyLaunchedBets, refreshKey]);
 
   const handleChanged = () => {
     setManageModalVisible(false);
@@ -49,20 +53,13 @@ export default function MyLaunchedBetsSection({
   };
 
   return (
-    <View
-      style={{
-        backgroundColor: "#fff",
-        padding: 20,
-        borderRadius: 12,
-        marginBottom: 20,
-      }}
-    >
-      <SectionHeader title="Mes paris lancés" />
-
-      {bets.length === 0 ? (
-        <Text>Aucun pari lancé en cours</Text>
-      ) : (
-        bets.map((bet) => (
+    <>
+      <BetsSection
+        title="Mes paris lancés"
+        isEmpty={bets.length === 0}
+        emptyMessage="Aucun pari lancé en cours"
+      >
+        {bets.map((bet) => (
           <BetRow
             key={bet.id}
             title={bet.title}
@@ -79,8 +76,8 @@ export default function MyLaunchedBetsSection({
               </Pressable>
             }
           />
-        ))
-      )}
+        ))}
+      </BetsSection>
 
       <ResolveBetModal
         visible={manageModalVisible}
@@ -91,6 +88,6 @@ export default function MyLaunchedBetsSection({
         }}
         onChanged={handleChanged}
       />
-    </View>
+    </>
   );
 }
