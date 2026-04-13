@@ -81,7 +81,7 @@ export default function Account() {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.7,
-      base64: true, // 🔥 IMPORTANT
+      base64: true,
     });
 
     if (result.canceled) return;
