@@ -4,7 +4,7 @@ import React from 'react';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { colors } from '@/constants/theme';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   return (
@@ -35,7 +35,9 @@ export default function TabLayout() {
         name="ranking"
         options={{
           title: 'Classement',
-          tabBarIcon: ({ color }) => <MaterialIcons name="emoji-events" size={28} color={color} />,
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="trophy" size={28} color={color} />
+          ),
         }}
       />
 
