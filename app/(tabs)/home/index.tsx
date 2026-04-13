@@ -1,37 +1,19 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
-import OpenBetsScreen from './openBets';
+import React from "react";
+import { ScrollView, Text, View } from "react-native";
+import { useAuth } from "@/contexts/auth-context";
+import OpenBetsSection from "./sections/OpenBetsSection";
+import MyLaunchedBetsSection from "./sections/MyLaunchedBetsSection";
+import FinishedBetsSection from "./sections/FinishedBetsSection";
 
 export default function HomeScreen() {
-  const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState<string | null>(null);
-  const router = useRouter();
+  const { user, isLoading } = useAuth();
+  const [refreshKey, setRefreshKey] = React.useState(0);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const storedUser = await AsyncStorage.getItem('user');
+  const refreshAll = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
-        if (!storedUser) {
-          router.replace('/login');
-        } else {
-          const user = JSON.parse(storedUser);
-          setUsername(user.username);
-        }
-      } catch (e) {
-        console.log(e);
-        router.replace('/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkUser();
-  }, [router]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={{ marginTop: 100 }}>
         <Text>Chargement...</Text>
@@ -39,12 +21,34 @@ export default function HomeScreen() {
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 24 }}>
-        Bienvenue {username} 🍻
+    <ScrollView
+      contentContainerStyle={{
+        padding: 20,
+        backgroundColor: "#f5f5f5",
+      }}
+    >
+      <Text style={{ fontSize: 24, marginBottom: 20 }}>
+        Bienvenue {user.username} 🍻
       </Text>
-      <OpenBetsScreen />
-    </View>
+
+      <OpenBetsSection
+        userId={user.id}
+        refreshKey={refreshKey}
+        onDataChanged={refreshAll}
+      />
+
+      <MyLaunchedBetsSection
+        userId={user.id}
+        refreshKey={refreshKey}
+        onDataChanged={refreshAll}
+      />
+
+      <FinishedBetsSection refreshKey={refreshKey} />
+    </ScrollView>
   );
 }
