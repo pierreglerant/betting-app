@@ -51,7 +51,7 @@ export default function Login() {
           marginBottom: 30,
           textAlign: 'center',
           color: colors.text,
-          fontFamily: fonts.bold,
+          fontFamily: fonts.display,
         }}
       >
         Bets & Binouzes

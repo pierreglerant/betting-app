@@ -133,7 +133,7 @@ export default function Account() {
           textAlign: 'center',
           marginBottom: 30,
           color: colors.text,
-          fontFamily: fonts.bold,
+          fontFamily: fonts.display,
         }}
       >
         Mon Compte

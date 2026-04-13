@@ -79,7 +79,7 @@ export default function ResolveBetModal({
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
-      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.bold }}>
+      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.display }}>
         Gérer le pari
       </Text>
 

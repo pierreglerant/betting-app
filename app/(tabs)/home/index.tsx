@@ -43,7 +43,9 @@ export default function HomeScreen() {
         backgroundColor: colors.background,
       }}
     >
-      <Text style={{ fontSize: 24, marginBottom: 20, color: colors.text, fontFamily: fonts.bold }}>
+      <Text
+        style={{ fontSize: 24, marginBottom: 20, color: colors.text, fontFamily: fonts.display }}
+      >
         Bienvenue {user.username} 🍻
       </Text>
 

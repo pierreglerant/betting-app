@@ -3,4 +3,6 @@ export const fonts = {
   medium: 'Manrope_500Medium',
   semiBold: 'Manrope_600SemiBold',
   bold: 'Manrope_700Bold',
+  extraBold: 'Manrope_800ExtraBold',
+  display: 'BebasNeue_400Regular',
 } as const;

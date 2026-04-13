@@ -100,7 +100,7 @@ export default function CreateBetModal({
 
   return (
     <BaseModal visible={visible} onClose={handleClose}>
-      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.bold }}>
+      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.display }}>
         Créer un pari
       </Text>
 
