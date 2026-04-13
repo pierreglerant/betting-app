@@ -20,6 +20,9 @@ export default function BetRow({ title, context, deadline, rightElement }: BetRo
         padding: 20,
         borderRadius: 12,
         marginBottom: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
       }}
     >
       <View style={{ flex: 1, marginRight: 12 }}>
@@ -33,7 +36,7 @@ export default function BetRow({ title, context, deadline, rightElement }: BetRo
           </Text>
         ) : null}
       </View>
-      {rightElement}
+      {rightElement ? <View style={{ alignSelf: 'center' }}>{rightElement}</View> : null}
     </View>
   );
 }
