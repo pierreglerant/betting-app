@@ -17,7 +17,14 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View style={{ marginTop: 100, alignItems: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          marginTop: 100,
+          alignItems: 'center',
+          backgroundColor: colors.background,
+        }}
+      >
         <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>Chargement...</Text>
       </View>
     );
@@ -29,7 +36,9 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{
+        flexGrow: 1,
         padding: 20,
         backgroundColor: colors.background,
       }}

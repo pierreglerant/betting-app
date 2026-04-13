@@ -6,6 +6,7 @@ import {
   Manrope_700Bold,
   useFonts,
 } from '@expo-google-fonts/manrope';
+import { colors } from '@/constants/theme';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
@@ -42,7 +43,14 @@ function RootLayoutNav() {
     }
   }, [isSignedIn, segments, isLoading, router]);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    />
+  );
 }
 
 export default function RootLayout() {

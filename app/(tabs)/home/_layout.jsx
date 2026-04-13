@@ -1,9 +1,15 @@
 import { Stack } from 'expo-router';
+import { colors } from '@/constants/theme';
 
 export default function HomeLayout() {
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    >
+      <Stack.Screen name="index" />
     </Stack>
   );
 }
