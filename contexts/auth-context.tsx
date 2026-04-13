@@ -74,7 +74,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setUserState(safeUser);
         console.log('[auth] initAuth:setUser from storage', safeUser);
-
       } catch (e) {
         console.error('[auth] initAuth:error', e);
       } finally {

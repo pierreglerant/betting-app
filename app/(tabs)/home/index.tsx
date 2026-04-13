@@ -1,9 +1,10 @@
-import React from "react";
-import { ScrollView, Text, View } from "react-native";
-import { useAuth } from "@/contexts/auth-context";
-import OpenBetsSection from "./sections/OpenBetsSection";
-import MyLaunchedBetsSection from "./sections/MyLaunchedBetsSection";
-import FinishedBetsSection from "./sections/FinishedBetsSection";
+import { colors } from '@/constants/theme';
+import { useAuth } from '@/contexts/auth-context';
+import React from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import FinishedBetsSection from './sections/FinishedBetsSection';
+import MyLaunchedBetsSection from './sections/MyLaunchedBetsSection';
+import OpenBetsSection from './sections/OpenBetsSection';
 
 export default function HomeScreen() {
   const { user, isLoading } = useAuth();
@@ -15,8 +16,8 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View style={{ marginTop: 100 }}>
-        <Text>Chargement...</Text>
+      <View style={{ marginTop: 100, alignItems: 'center' }}>
+        <Text style={{ color: colors.textMuted }}>Chargement...</Text>
       </View>
     );
   }
@@ -29,24 +30,16 @@ export default function HomeScreen() {
     <ScrollView
       contentContainerStyle={{
         padding: 20,
-        backgroundColor: "#f5f5f5",
+        backgroundColor: colors.background,
       }}
     >
-      <Text style={{ fontSize: 24, marginBottom: 20 }}>
+      <Text style={{ fontSize: 24, marginBottom: 20, color: colors.text }}>
         Bienvenue {user.username} 🍻
       </Text>
 
-      <OpenBetsSection
-        userId={user.id}
-        refreshKey={refreshKey}
-        onDataChanged={refreshAll}
-      />
+      <OpenBetsSection userId={user.id} refreshKey={refreshKey} onDataChanged={refreshAll} />
 
-      <MyLaunchedBetsSection
-        userId={user.id}
-        refreshKey={refreshKey}
-        onDataChanged={refreshAll}
-      />
+      <MyLaunchedBetsSection userId={user.id} refreshKey={refreshKey} onDataChanged={refreshAll} />
 
       <FinishedBetsSection refreshKey={refreshKey} />
     </ScrollView>

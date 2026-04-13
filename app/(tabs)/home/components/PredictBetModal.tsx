@@ -1,8 +1,9 @@
-import React from "react";
-import { Text, View, Button, TextInput } from "react-native";
-import BaseModal from "./BaseModal";
-import { supabase } from "@/libs/supabase";
-import { Bet, PredictionChoice } from "../types";
+import { colors } from '@/constants/theme';
+import { supabase } from '@/libs/supabase';
+import React from 'react';
+import { Button, Text, TextInput, View } from 'react-native';
+import { Bet, PredictionChoice } from '../types';
+import BaseModal from './BaseModal';
 
 type PredictBetModalProps = {
   visible: boolean;
@@ -20,12 +21,12 @@ export default function PredictBetModal({
   onPredicted,
 }: PredictBetModalProps) {
   const [choice, setChoice] = React.useState<PredictionChoice | null>(null);
-  const [amount, setAmount] = React.useState("");
+  const [amount, setAmount] = React.useState('');
 
   React.useEffect(() => {
     if (!visible) {
       setChoice(null);
-      setAmount("");
+      setAmount('');
     }
   }, [visible]);
 
@@ -35,7 +36,7 @@ export default function PredictBetModal({
     const parsedAmount = parseInt(amount, 10);
     if (Number.isNaN(parsedAmount)) return;
 
-    const { error } = await supabase.from("predictions").insert({
+    const { error } = await supabase.from('predictions').insert({
       bet_id: bet.id,
       user_id: userId,
       choice,
@@ -43,7 +44,7 @@ export default function PredictBetModal({
     });
 
     if (error) {
-      console.error("Error creating prediction:", error);
+      console.error('Error creating prediction:', error);
       return;
     }
 
@@ -53,19 +54,19 @@ export default function PredictBetModal({
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
-      <Text style={{ marginBottom: 10, fontWeight: "bold" }}>
+      <Text style={{ marginBottom: 10, fontWeight: 'bold', color: colors.text }}>
         Faire un pari
       </Text>
 
-      {bet ? <Text style={{ marginBottom: 10 }}>{bet.title}</Text> : null}
+      {bet ? <Text style={{ marginBottom: 10, color: colors.textMuted }}>{bet.title}</Text> : null}
 
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <Button title="Oui" onPress={() => setChoice("yes")} />
-        <Button title="Non" onPress={() => setChoice("no")} />
+      <View style={{ flexDirection: 'row', gap: 10 }}>
+        <Button title="Oui" onPress={() => setChoice('yes')} color={colors.success} />
+        <Button title="Non" onPress={() => setChoice('no')} color={colors.danger} />
       </View>
 
-      <Text style={{ marginTop: 10 }}>
-        Choix : {choice === "yes" ? "Oui" : choice === "no" ? "Non" : "-"}
+      <Text style={{ marginTop: 10, color: colors.textMuted }}>
+        Choix : {choice === 'yes' ? 'Oui' : choice === 'no' ? 'Non' : '-'}
       </Text>
 
       <TextInput
@@ -75,15 +76,18 @@ export default function PredictBetModal({
         keyboardType="numeric"
         style={{
           borderWidth: 1,
-          borderColor: "#ccc",
+          borderColor: colors.border,
           marginTop: 10,
           padding: 10,
           borderRadius: 8,
+          color: colors.text,
+          backgroundColor: colors.cardSoft,
         }}
+        placeholderTextColor={colors.textMuted}
       />
 
       <View style={{ marginTop: 15 }}>
-        <Button title="Valider" onPress={handlePredict} />
+        <Button title="Valider" onPress={handlePredict} color={colors.primary} />
       </View>
     </BaseModal>
   );

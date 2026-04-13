@@ -1,11 +1,12 @@
-import React from "react";
-import { View, Text, Pressable } from "react-native";
-import { supabase } from "@/libs/supabase";
-import { Bet } from "../types";
-import SectionHeader from "../components/SectionHeader";
-import BetRow from "../components/BetRow";
-import BetStatusBadge from "../components/BetStatusBadge";
-import ResolveBetModal from "../components/ResolveBetModal";
+import { colors } from '@/constants/theme';
+import { supabase } from '@/libs/supabase';
+import React from 'react';
+import { Pressable, Text, View } from 'react-native';
+import BetRow from '../components/BetRow';
+import BetStatusBadge from '../components/BetStatusBadge';
+import ResolveBetModal from '../components/ResolveBetModal';
+import SectionHeader from '../components/SectionHeader';
+import { Bet } from '../types';
 
 type MyLaunchedBetsSectionProps = {
   userId: string;
@@ -22,25 +23,29 @@ export default function MyLaunchedBetsSection({
   const [manageModalVisible, setManageModalVisible] = React.useState(false);
   const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);
 
-  const fetchMyLaunchedBets = async () => {
+  const fetchMyLaunchedBets = React.useCallback(async () => {
     const { data, error } = await supabase
-      .from("bets")
-      .select("*")
-      .eq("creator_id", userId)
-      .eq("status", "open")
-      .order("created_at", { ascending: false });
+      .from('bets')
+      .select('*')
+      .eq('creator_id', userId)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Error fetching my launched bets:", error);
+      console.error('Error fetching my launched bets:', error);
       return;
     }
 
     setBets(data || []);
-  };
+  }, [userId]);
 
   React.useEffect(() => {
-    fetchMyLaunchedBets();
-  }, [userId, refreshKey]);
+    const loadMyLaunchedBets = async () => {
+      await fetchMyLaunchedBets();
+    };
+
+    loadMyLaunchedBets();
+  }, [fetchMyLaunchedBets, refreshKey]);
 
   const handleChanged = () => {
     setManageModalVisible(false);
@@ -51,7 +56,9 @@ export default function MyLaunchedBetsSection({
   return (
     <View
       style={{
-        backgroundColor: "#fff",
+        backgroundColor: colors.card,
+        borderColor: colors.border,
+        borderWidth: 1,
         padding: 20,
         borderRadius: 12,
         marginBottom: 20,
@@ -60,7 +67,7 @@ export default function MyLaunchedBetsSection({
       <SectionHeader title="Mes paris lancés" />
 
       {bets.length === 0 ? (
-        <Text>Aucun pari lancé en cours</Text>
+        <Text style={{ color: colors.textMuted }}>Aucun pari lancé en cours</Text>
       ) : (
         bets.map((bet) => (
           <BetRow
