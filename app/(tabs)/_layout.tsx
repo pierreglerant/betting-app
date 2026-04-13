@@ -4,6 +4,7 @@ import React from 'react';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { colors } from '@/constants/theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   return (
@@ -29,6 +30,17 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
+
+      <Tabs.Screen
+        name="ranking"
+        options={{
+          title: 'Classement',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="trophy" size={28} color={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="account"
         options={{

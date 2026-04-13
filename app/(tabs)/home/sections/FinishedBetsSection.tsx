@@ -37,12 +37,7 @@ export default function FinishedBetsSection({ refreshKey }: FinishedBetsSectionP
       emptyMessage="Aucun pari cloturé"
     >
       {bets.map((bet) => (
-        <BetRow
-          key={bet.id}
-          title={bet.title}
-          context={bet.context}
-          deadline={bet.deadline}
-        />
+        <BetRow key={bet.id} title={bet.title} context={bet.context} deadline={bet.deadline} />
       ))}
     </BetsSection>
   );
