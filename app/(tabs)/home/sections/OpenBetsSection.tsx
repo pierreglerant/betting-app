@@ -52,25 +52,6 @@ export default function OpenBetsSection({
     onDataChanged();
   };
 
-  const renderRightElement = (bet: Bet) => {
-    const status = getStatus(bet);
-
-    if (status === 'pending') {
-      return (
-        <Pressable
-          onPress={() => {
-            setCurrentBet(bet);
-            setPredictionModalVisible(true);
-          }}
-        >
-          <BetStatusBadge status="pending" />
-        </Pressable>
-      );
-    }
-
-    return <BetStatusBadge status={status} />;
-  };
-
   const preview = openBets.slice(0, SECTION_PREVIEW_LIMIT);
   const showSeeAll = openBets.length > SECTION_PREVIEW_LIMIT;
 
@@ -94,15 +75,26 @@ export default function OpenBetsSection({
         isEmpty={openBets.length === 0}
         emptyMessage="Aucun pari en cours"
       >
-        {preview.map((bet) => (
-          <BetRow
-            key={bet.id}
-            title={bet.title}
-            context={bet.context}
-            deadline={bet.deadline}
-            rightElement={renderRightElement(bet)}
-          />
-        ))}
+        {preview.map((bet) => {
+          const status = getStatus(bet);
+          return (
+            <BetRow
+              key={bet.id}
+              title={bet.title}
+              context={bet.context}
+              deadline={bet.deadline}
+              rightElement={<BetStatusBadge status={status} />}
+              onPress={
+                status === 'pending'
+                  ? () => {
+                      setCurrentBet(bet);
+                      setPredictionModalVisible(true);
+                    }
+                  : undefined
+              }
+            />
+          );
+        })}
       </BetsSection>
 
       <CreateBetModal

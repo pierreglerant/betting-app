@@ -39,25 +39,6 @@ export default function OpenBetsAllScreen() {
     reload();
   };
 
-  const renderRightElement = (bet: Bet) => {
-    const status = getStatus(bet);
-
-    if (status === 'pending') {
-      return (
-        <Pressable
-          onPress={() => {
-            setCurrentBet(bet);
-            setPredictionModalVisible(true);
-          }}
-        >
-          <BetStatusBadge status="pending" />
-        </Pressable>
-      );
-    }
-
-    return <BetStatusBadge status={status} />;
-  };
-
   if (!userId) {
     return null;
   }
@@ -101,15 +82,26 @@ export default function OpenBetsAllScreen() {
         </>
       }
     >
-      {openBets.map((bet) => (
-        <BetRow
-          key={bet.id}
-          title={bet.title}
-          context={bet.context}
-          deadline={bet.deadline}
-          rightElement={renderRightElement(bet)}
-        />
-      ))}
+      {openBets.map((bet) => {
+        const status = getStatus(bet);
+        return (
+          <BetRow
+            key={bet.id}
+            title={bet.title}
+            context={bet.context}
+            deadline={bet.deadline}
+            rightElement={<BetStatusBadge status={status} />}
+            onPress={
+              status === 'pending'
+                ? () => {
+                    setCurrentBet(bet);
+                    setPredictionModalVisible(true);
+                  }
+                : undefined
+            }
+          />
+        );
+      })}
     </BetsAllScreenShell>
   );
 }

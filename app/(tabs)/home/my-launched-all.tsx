@@ -1,6 +1,5 @@
 import { useAuth } from '@/contexts/auth-context';
 import React from 'react';
-import { Pressable } from 'react-native';
 import BetRow from './components/BetRow';
 import BetStatusBadge from './components/BetStatusBadge';
 import BetsAllScreenShell from './components/BetsAllScreenShell';
@@ -50,16 +49,11 @@ export default function MyLaunchedAllScreen() {
           title={bet.title}
           context={bet.context}
           deadline={bet.deadline}
-          rightElement={
-            <Pressable
-              onPress={() => {
-                setCurrentBet(bet);
-                setManageModalVisible(true);
-              }}
-            >
-              <BetStatusBadge status="manage" />
-            </Pressable>
-          }
+          rightElement={<BetStatusBadge status="manage" />}
+          onPress={() => {
+            setCurrentBet(bet);
+            setManageModalVisible(true);
+          }}
         />
       ))}
     </BetsAllScreenShell>

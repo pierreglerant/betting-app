@@ -1,30 +1,32 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 type BetRowProps = {
   title: string;
   context?: string | null;
   deadline?: string | null;
   rightElement?: React.ReactNode;
+  /** When set, the whole row is tappable (not only the badge). */
+  onPress?: () => void;
 };
 
-export default function BetRow({ title, context, deadline, rightElement }: BetRowProps) {
-  return (
-    <View
-      style={{
-        backgroundColor: colors.card,
-        borderColor: colors.border,
-        borderWidth: 1,
-        padding: 20,
-        borderRadius: 12,
-        marginBottom: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
-    >
+export default function BetRow({ title, context, deadline, rightElement, onPress }: BetRowProps) {
+  const rowStyle = {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1,
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+  };
+
+  const inner = (
+    <>
       <View style={{ flex: 1, marginRight: 12 }}>
         <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>{title}</Text>
         {context ? (
@@ -37,6 +39,20 @@ export default function BetRow({ title, context, deadline, rightElement }: BetRo
         ) : null}
       </View>
       {rightElement ? <View style={{ alignSelf: 'center' }}>{rightElement}</View> : null}
-    </View>
+    </>
   );
+
+  if (onPress) {
+    return (
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        style={({ pressed }) => [rowStyle, { opacity: pressed ? 0.88 : 1 }]}
+      >
+        {inner}
+      </Pressable>
+    );
+  }
+
+  return <View style={rowStyle}>{inner}</View>;
 }

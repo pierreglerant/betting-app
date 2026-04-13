@@ -1,6 +1,5 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable } from 'react-native';
 import { SECTION_PREVIEW_LIMIT } from '@/constants/bets';
 import { useMyLaunchedBetsData } from '../hooks/useBetQueries';
 import BetRow from '../components/BetRow';
@@ -54,16 +53,11 @@ export default function MyLaunchedBetsSection({
             title={bet.title}
             context={bet.context}
             deadline={bet.deadline}
-            rightElement={
-              <Pressable
-                onPress={() => {
-                  setCurrentBet(bet);
-                  setManageModalVisible(true);
-                }}
-              >
-                <BetStatusBadge status="manage" />
-              </Pressable>
-            }
+            rightElement={<BetStatusBadge status="manage" />}
+            onPress={() => {
+              setCurrentBet(bet);
+              setManageModalVisible(true);
+            }}
           />
         ))}
       </BetsSection>
