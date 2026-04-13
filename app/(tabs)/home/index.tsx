@@ -6,6 +6,7 @@ import { Pressable, Image, ScrollView, Text, View } from 'react-native';
 import FinishedBetsSection from './sections/FinishedBetsSection';
 import MyLaunchedBetsSection from './sections/MyLaunchedBetsSection';
 import OpenBetsSection from './sections/OpenBetsSection';
+import StatisticsSection from './sections/StatisticsSection';
 import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
@@ -99,6 +100,7 @@ export default function HomeScreen() {
           padding: 20,
         }}
       >
+        <StatisticsSection userId={user.id} />
         <OpenBetsSection userId={user.id} refreshKey={refreshKey} onDataChanged={refreshAll} />
 
         <MyLaunchedBetsSection
