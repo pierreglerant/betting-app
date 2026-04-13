@@ -1,3 +1,4 @@
+import { colors } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/contexts/auth-context';
 import {
   Manrope_400Regular,
@@ -6,10 +7,9 @@ import {
   Manrope_700Bold,
   useFonts,
 } from '@expo-google-fonts/manrope';
-import { colors } from '@/constants/theme';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
