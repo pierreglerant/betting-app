@@ -1,13 +1,11 @@
-import { colors } from '@/constants/theme';
-import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable } from 'react-native';
 import BetRow from '../components/BetRow';
+import BetsSection from '../components/BetsSection';
 import BetStatusBadge from '../components/BetStatusBadge';
 import CreateBetModal from '../components/CreateBetModal';
 import PredictBetModal from '../components/PredictBetModal';
-import SectionHeader from '../components/SectionHeader';
 import { Bet, BetUserStatus, UserLite } from '../types';
 
 type OpenBetsSectionProps = {
@@ -124,28 +122,18 @@ export default function OpenBetsSection({
   };
 
   return (
-    <View
-      style={{
-        padding: 10,
-        borderRadius: 12,
-        marginBottom: 20,
-      }}
-    >
-      <SectionHeader
+    <>
+      <BetsSection
         title="Paris en cours"
         rightElement={
           <Pressable onPress={() => setCreateModalVisible(true)}>
             <BetStatusBadge status="manage" />
           </Pressable>
         }
-      />
-
-      {openBets.length === 0 ? (
-        <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>
-          Aucun pari en cours
-        </Text>
-      ) : (
-        openBets.map((bet) => (
+        isEmpty={openBets.length === 0}
+        emptyMessage="Aucun pari en cours"
+      >
+        {openBets.map((bet) => (
           <BetRow
             key={bet.id}
             title={bet.title}
@@ -153,8 +141,8 @@ export default function OpenBetsSection({
             deadline={bet.deadline}
             rightElement={renderRightElement(bet)}
           />
-        ))
-      )}
+        ))}
+      </BetsSection>
 
       <CreateBetModal
         visible={createModalVisible}
@@ -174,6 +162,6 @@ export default function OpenBetsSection({
         }}
         onPredicted={handlePredicted}
       />
-    </View>
+    </>
   );
 }

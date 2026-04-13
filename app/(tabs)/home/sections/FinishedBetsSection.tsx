@@ -1,11 +1,8 @@
-import { colors } from '@/constants/theme';
-import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
-import { Text, View } from 'react-native';
 import BetRow from '../components/BetRow';
+import BetsSection from '../components/BetsSection';
 import BetStatusBadge from '../components/BetStatusBadge';
-import SectionHeader from '../components/SectionHeader';
 import { Bet } from '../types';
 
 type FinishedBetsSectionProps = {
@@ -35,37 +32,26 @@ export default function FinishedBetsSection({ refreshKey }: FinishedBetsSectionP
   }, [refreshKey]);
 
   return (
-    <View
-      style={{
-        backgroundColor: colors.card,
-        borderColor: colors.border,
-        borderWidth: 1,
-        padding: 20,
-        borderRadius: 12,
-        marginBottom: 20,
-      }}
+    <BetsSection
+      title="Historique des paris finis"
+      isEmpty={bets.length === 0}
+      emptyMessage="Aucun pari fini"
     >
-      <SectionHeader title="Historique des paris finis" />
-
-      {bets.length === 0 ? (
-        <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>Aucun pari fini</Text>
-      ) : (
-        bets.map((bet) => (
-          <BetRow
-            key={bet.id}
-            title={bet.title}
-            context={bet.context}
-            deadline={bet.deadline}
-            rightElement={
-              bet.result === 'yes' ? (
-                <BetStatusBadge status="resolved_yes" />
-              ) : bet.result === 'no' ? (
-                <BetStatusBadge status="resolved_no" />
-              ) : null
-            }
-          />
-        ))
-      )}
-    </View>
+      {bets.map((bet) => (
+        <BetRow
+          key={bet.id}
+          title={bet.title}
+          context={bet.context}
+          deadline={bet.deadline}
+          rightElement={
+            bet.result === 'yes' ? (
+              <BetStatusBadge status="resolved_yes" />
+            ) : bet.result === 'no' ? (
+              <BetStatusBadge status="resolved_no" />
+            ) : null
+          }
+        />
+      ))}
+    </BetsSection>
   );
 }
