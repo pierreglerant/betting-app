@@ -2,7 +2,6 @@ import { supabase } from '@/libs/supabase';
 import React from 'react';
 import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
-import BetStatusBadge from '../components/BetStatusBadge';
 import { Bet } from '../types';
 
 type FinishedBetsSectionProps = {
@@ -43,13 +42,6 @@ export default function FinishedBetsSection({ refreshKey }: FinishedBetsSectionP
           title={bet.title}
           context={bet.context}
           deadline={bet.deadline}
-          rightElement={
-            bet.result === 'yes' ? (
-              <BetStatusBadge status="resolved_yes" />
-            ) : bet.result === 'no' ? (
-              <BetStatusBadge status="resolved_no" />
-            ) : null
-          }
         />
       ))}
     </BetsSection>
