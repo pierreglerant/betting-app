@@ -12,7 +12,8 @@ export default function StatisticsSection({ userId }) {
     backgroundColor: colors.card,
     borderColor: colors.border,
     borderWidth: 1,
-    padding: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 12,
     borderRadius: 12,
     alignItems: 'center',
   };
@@ -114,7 +115,7 @@ export default function StatisticsSection({ userId }) {
               textAlign: 'center',
             }}
           >
-            Win %
+            Winrate
           </Text>
 
           <Text

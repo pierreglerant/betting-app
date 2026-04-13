@@ -2,14 +2,14 @@ import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, Image, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { useUserPointsNumber } from './hooks/useBetQueries';
 import FinishedBetsSection from './sections/FinishedBetsSection';
 import MyLaunchedBetsSection from './sections/MyLaunchedBetsSection';
 import OpenBetsSection from './sections/OpenBetsSection';
 import StatisticsSection from './sections/StatisticsSection';
-import { useRouter } from 'expo-router';
-import { useUserPointsNumber } from './hooks/useBetQueries';
 
 export default function HomeScreen() {
   const { user, isLoading } = useAuth();
