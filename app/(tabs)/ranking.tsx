@@ -1,7 +1,7 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
-import { Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Text, View } from 'react-native';
 
 const fakeRanking = [
   { id: 1, name: 'John Doe', points: 100 },

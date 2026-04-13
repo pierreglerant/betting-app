@@ -1,16 +1,20 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, Image, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { useUserPointsNumber } from './hooks/useBetQueries';
 import FinishedBetsSection from './sections/FinishedBetsSection';
 import MyLaunchedBetsSection from './sections/MyLaunchedBetsSection';
 import OpenBetsSection from './sections/OpenBetsSection';
-import { useRouter } from 'expo-router';
+import StatisticsSection from './sections/StatisticsSection';
 
 export default function HomeScreen() {
   const { user, isLoading } = useAuth();
   const [refreshKey, setRefreshKey] = React.useState(0);
+  const { points } = useUserPointsNumber(user?.id);
   const router = useRouter();
 
   const refreshAll = () => {
@@ -38,7 +42,7 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* HEADER FIXE */}
+      {/* header */}
       <View
         style={{
           flexDirection: 'row',
@@ -91,14 +95,42 @@ export default function HomeScreen() {
         >
           {user.username}
         </Text>
+        <View
+          style={{
+            marginLeft: 'auto',
+            backgroundColor: colors.primary,
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 4,
+            paddingHorizontal: 10,
+            borderRadius: 12,
+          }}
+        >
+          <FontAwesome5
+            name="coins"
+            solid
+            size={16}
+            color={colors.text}
+            style={{ marginRight: 6 }}
+          />
+          <Text
+            style={{
+              color: colors.text,
+              fontFamily: fonts.medium,
+            }}
+          >
+            {points} pts
+          </Text>
+        </View>
       </View>
 
-      {/* CONTENU SCROLLABLE */}
+      {/* Scrollable Content */}
       <ScrollView
         contentContainerStyle={{
           padding: 20,
         }}
       >
+        <StatisticsSection userId={user.id} />
         <OpenBetsSection userId={user.id} refreshKey={refreshKey} onDataChanged={refreshAll} />
 
         <MyLaunchedBetsSection
