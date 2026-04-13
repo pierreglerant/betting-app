@@ -5,6 +5,7 @@ import React from 'react';
 import { Button, Text, TextInput, View } from 'react-native';
 import { Bet, PredictionChoice } from '../types';
 import BaseModal from './BaseModal';
+import ModalTitle from './ModalTitle';
 
 type PredictBetModalProps = {
   visible: boolean;
@@ -55,9 +56,7 @@ export default function PredictBetModal({
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
-      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.display }}>
-        Faire un pari
-      </Text>
+      <ModalTitle title="Faire un pari" />
 
       {bet ? (
         <Text style={{ marginBottom: 10, color: colors.textMuted, fontFamily: fonts.medium }}>
