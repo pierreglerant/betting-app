@@ -1,11 +1,11 @@
 import React from "react";
-import { Modal, Pressable, View } from "react-native";
+import { Modal, Pressable, DimensionValue } from "react-native";
 
 type BaseModalProps = {
   visible: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  width?: string | number;
+  width?: DimensionValue;
 };
 
 export default function BaseModal({
