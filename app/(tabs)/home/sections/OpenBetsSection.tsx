@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
@@ -143,7 +144,9 @@ export default function OpenBetsSection({
       />
 
       {openBets.length === 0 ? (
-        <Text style={{ color: colors.textMuted }}>Aucun pari en cours</Text>
+        <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>
+          Aucun pari en cours
+        </Text>
       ) : (
         openBets.map((bet) => (
           <BetRow

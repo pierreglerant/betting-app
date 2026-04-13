@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import React from 'react';
 import { Text, View } from 'react-native';
 
@@ -20,10 +21,12 @@ export default function BetRow({ title, context, deadline, rightElement }: BetRo
       }}
     >
       <View style={{ flex: 1, marginRight: 12 }}>
-        <Text style={{ fontWeight: 'bold', color: colors.text }}>{title}</Text>
-        {context ? <Text style={{ color: colors.textMuted }}>{context}</Text> : null}
+        <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>{title}</Text>
+        {context ? (
+          <Text style={{ color: colors.textMuted, fontFamily: fonts.regular }}>{context}</Text>
+        ) : null}
         {deadline ? (
-          <Text style={{ color: colors.textMuted, marginTop: 4 }}>
+          <Text style={{ color: colors.textMuted, marginTop: 4, fontFamily: fonts.medium }}>
             Fin : {new Date(deadline).toLocaleDateString()}
           </Text>
         ) : null}

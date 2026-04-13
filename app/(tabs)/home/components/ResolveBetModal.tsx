@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
 import { Button, Text, View } from 'react-native';
@@ -78,11 +79,15 @@ export default function ResolveBetModal({
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
-      <Text style={{ fontWeight: 'bold', marginBottom: 10, color: colors.text }}>
+      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.bold }}>
         Gérer le pari
       </Text>
 
-      {bet ? <Text style={{ marginBottom: 15, color: colors.textMuted }}>{bet.title}</Text> : null}
+      {bet ? (
+        <Text style={{ marginBottom: 15, color: colors.textMuted, fontFamily: fonts.medium }}>
+          {bet.title}
+        </Text>
+      ) : null}
 
       <View style={{ marginBottom: 10 }}>
         <Button title="Résultat : Oui" onPress={() => resolveBet('yes')} color={colors.success} />

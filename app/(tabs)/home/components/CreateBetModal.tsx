@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React from 'react';
@@ -99,7 +100,7 @@ export default function CreateBetModal({
 
   return (
     <BaseModal visible={visible} onClose={handleClose}>
-      <Text style={{ fontWeight: 'bold', marginBottom: 10, color: colors.text }}>
+      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.bold }}>
         Créer un pari
       </Text>
 
@@ -115,6 +116,7 @@ export default function CreateBetModal({
           borderRadius: 8,
           backgroundColor: colors.cardSoft,
           color: colors.text,
+          fontFamily: fonts.regular,
         }}
         placeholderTextColor={colors.textMuted}
       />
@@ -134,6 +136,7 @@ export default function CreateBetModal({
           textAlignVertical: 'top',
           backgroundColor: colors.cardSoft,
           color: colors.text,
+          fontFamily: fonts.regular,
         }}
         placeholderTextColor={colors.textMuted}
       />
@@ -156,7 +159,14 @@ export default function CreateBetModal({
         />
       ) : null}
 
-      <Text style={{ marginTop: 15, marginBottom: 5, color: colors.textMuted }}>
+      <Text
+        style={{
+          marginTop: 15,
+          marginBottom: 5,
+          color: colors.textMuted,
+          fontFamily: fonts.medium,
+        }}
+      >
         Participants à exclure
       </Text>
 
@@ -175,7 +185,14 @@ export default function CreateBetModal({
                 borderRadius: 8,
               }}
             >
-              <Text style={{ color: selected ? colors.text : colors.textMuted }}>{u.username}</Text>
+              <Text
+                style={{
+                  color: selected ? colors.text : colors.textMuted,
+                  fontFamily: selected ? fonts.semiBold : fonts.regular,
+                }}
+              >
+                {u.username}
+              </Text>
             </Pressable>
           );
         })}

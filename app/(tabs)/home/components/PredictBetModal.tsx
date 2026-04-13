@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
 import { Button, Text, TextInput, View } from 'react-native';
@@ -54,18 +55,22 @@ export default function PredictBetModal({
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
-      <Text style={{ marginBottom: 10, fontWeight: 'bold', color: colors.text }}>
+      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.bold }}>
         Faire un pari
       </Text>
 
-      {bet ? <Text style={{ marginBottom: 10, color: colors.textMuted }}>{bet.title}</Text> : null}
+      {bet ? (
+        <Text style={{ marginBottom: 10, color: colors.textMuted, fontFamily: fonts.medium }}>
+          {bet.title}
+        </Text>
+      ) : null}
 
       <View style={{ flexDirection: 'row', gap: 10 }}>
         <Button title="Oui" onPress={() => setChoice('yes')} color={colors.success} />
         <Button title="Non" onPress={() => setChoice('no')} color={colors.danger} />
       </View>
 
-      <Text style={{ marginTop: 10, color: colors.textMuted }}>
+      <Text style={{ marginTop: 10, color: colors.textMuted, fontFamily: fonts.medium }}>
         Choix : {choice === 'yes' ? 'Oui' : choice === 'no' ? 'Non' : '-'}
       </Text>
 
@@ -82,6 +87,7 @@ export default function PredictBetModal({
           borderRadius: 8,
           color: colors.text,
           backgroundColor: colors.cardSoft,
+          fontFamily: fonts.regular,
         }}
         placeholderTextColor={colors.textMuted}
       />

@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import React from 'react';
 import { Text, View } from 'react-native';
 import { BetUserStatus } from '../types';
@@ -29,7 +30,9 @@ export default function BetStatusBadge({ status }: BetStatusBadgeProps) {
         borderRadius: 999,
       }}
     >
-      <Text style={{ color: colors.text, fontSize: 12, fontWeight: '600' }}>{badge.label}</Text>
+      <Text style={{ color: colors.text, fontSize: 12, fontFamily: fonts.semiBold }}>
+        {badge.label}
+      </Text>
     </View>
   );
 }

@@ -1,6 +1,16 @@
 import { AuthProvider, useAuth } from '@/contexts/auth-context';
+import {
+  Manrope_400Regular,
+  Manrope_500Medium,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+  useFonts,
+} from '@expo-google-fonts/manrope';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const { isSignedIn, isLoading } = useAuth();
@@ -36,6 +46,25 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Manrope_400Regular,
+    Manrope_500Medium,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+  });
+
+  useEffect(() => {
+    if (!fontsLoaded) {
+      return;
+    }
+
+    SplashScreen.hideAsync();
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <AuthProvider>
       <RootLayoutNav />

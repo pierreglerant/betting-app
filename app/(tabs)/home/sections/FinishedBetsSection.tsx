@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
 import { Text, View } from 'react-native';
@@ -47,7 +48,7 @@ export default function FinishedBetsSection({ refreshKey }: FinishedBetsSectionP
       <SectionHeader title="Historique des paris finis" />
 
       {bets.length === 0 ? (
-        <Text style={{ color: colors.textMuted }}>Aucun pari fini</Text>
+        <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>Aucun pari fini</Text>
       ) : (
         bets.map((bet) => (
           <BetRow

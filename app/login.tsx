@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
 import { supabase } from '@/libs/supabase';
 import { useRouter } from 'expo-router';
@@ -44,8 +45,16 @@ export default function Login() {
     <View
       style={{ flex: 1, justifyContent: 'center', padding: 20, backgroundColor: colors.background }}
     >
-      <Text style={{ fontSize: 28, marginBottom: 30, textAlign: 'center', color: colors.text }}>
-        🍻 Bets & Binouzes
+      <Text
+        style={{
+          fontSize: 28,
+          marginBottom: 30,
+          textAlign: 'center',
+          color: colors.text,
+          fontFamily: fonts.bold,
+        }}
+      >
+        Bets & Binouzes
       </Text>
 
       <TextInput
@@ -62,6 +71,7 @@ export default function Login() {
           backgroundColor: colors.card,
           fontSize: 16,
           color: colors.text,
+          fontFamily: fonts.regular,
         }}
       />
 
@@ -77,13 +87,20 @@ export default function Login() {
         }}
         disabled={loading}
       >
-        <Text style={{ color: colors.text, fontSize: 16 }}>
+        <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.semiBold }}>
           {loading ? 'Connexion...' : 'Entrer'}
         </Text>
       </Pressable>
 
       {errorMessage ? (
-        <Text style={{ color: colors.danger, marginTop: 10, textAlign: 'center' }}>
+        <Text
+          style={{
+            color: colors.danger,
+            marginTop: 10,
+            textAlign: 'center',
+            fontFamily: fonts.medium,
+          }}
+        >
           {errorMessage}
         </Text>
       ) : null}

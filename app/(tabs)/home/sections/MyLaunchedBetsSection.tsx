@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
@@ -67,7 +68,9 @@ export default function MyLaunchedBetsSection({
       <SectionHeader title="Mes paris lancés" />
 
       {bets.length === 0 ? (
-        <Text style={{ color: colors.textMuted }}>Aucun pari lancé en cours</Text>
+        <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>
+          Aucun pari lancé en cours
+        </Text>
       ) : (
         bets.map((bet) => (
           <BetRow

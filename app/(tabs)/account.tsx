@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
 import { supabase } from '@/libs/supabase';
 import { decode } from 'base64-arraybuffer';
@@ -126,7 +127,15 @@ export default function Account() {
 
   return (
     <View style={{ flex: 1, padding: 20, paddingTop: 40, backgroundColor: colors.background }}>
-      <Text style={{ fontSize: 28, textAlign: 'center', marginBottom: 30, color: colors.text }}>
+      <Text
+        style={{
+          fontSize: 28,
+          textAlign: 'center',
+          marginBottom: 30,
+          color: colors.text,
+          fontFamily: fonts.bold,
+        }}
+      >
         Mon Compte
       </Text>
 
@@ -150,7 +159,7 @@ export default function Account() {
                     alignItems: 'center',
                   }}
                 >
-                  <Text>👤</Text>
+                  <Text style={{ fontFamily: fonts.medium }}>👤</Text>
                 </View>
               )}
             </Pressable>
@@ -164,7 +173,9 @@ export default function Account() {
                 borderRadius: 8,
               }}
             >
-              <Text style={{ color: colors.text }}>Changer la photo</Text>
+              <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>
+                Changer la photo
+              </Text>
             </Pressable>
           </View>
 
@@ -179,6 +190,7 @@ export default function Account() {
               borderRadius: 8,
               padding: 10,
               marginBottom: 10,
+              fontFamily: fonts.regular,
             }}
             placeholderTextColor={colors.textMuted}
           />
@@ -192,7 +204,7 @@ export default function Account() {
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: colors.text }}>Enregistrer</Text>
+            <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>Enregistrer</Text>
           </Pressable>
 
           <Pressable
@@ -207,7 +219,9 @@ export default function Account() {
             }}
             disabled={loading}
           >
-            <Text style={{ color: colors.text }}>{loading ? 'Déconnexion...' : 'Logout'}</Text>
+            <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>
+              {loading ? 'Déconnexion...' : 'Logout'}
+            </Text>
           </Pressable>
         </View>
       )}

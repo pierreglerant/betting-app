@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
 import React from 'react';
 import { Text, View } from 'react-native';
 
@@ -17,7 +18,7 @@ export default function SectionHeader({ title, rightElement }: SectionHeaderProp
         marginBottom: 16,
       }}
     >
-      <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text }}>{title}</Text>
+      <Text style={{ fontSize: 18, color: colors.text, fontFamily: fonts.bold }}>{title}</Text>
       {rightElement}
     </View>
   );
