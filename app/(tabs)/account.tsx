@@ -166,14 +166,19 @@ export default function Account() {
 
             <Pressable
               onPress={pickAndUploadImage}
-              style={{
-                marginTop: 10,
-                padding: 10,
-                backgroundColor: colors.primary,
-                borderRadius: 8,
-              }}
+              style={({ pressed }) => ({
+                marginTop: 14,
+                paddingVertical: 13,
+                paddingHorizontal: 22,
+                borderRadius: 14,
+                alignItems: 'center',
+                backgroundColor: pressed ? 'rgba(249, 115, 22, 0.22)' : 'rgba(249, 115, 22, 0.12)',
+                borderWidth: 1.5,
+                borderColor: 'rgba(249, 115, 22, 0.55)',
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+              })}
             >
-              <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>
+              <Text style={{ color: '#fb923c', fontFamily: fonts.semiBold, fontSize: 15 }}>
                 Changer la photo
               </Text>
             </Pressable>
@@ -197,29 +202,53 @@ export default function Account() {
 
           <Pressable
             onPress={updateUsername}
-            style={{
-              backgroundColor: colors.primary,
-              padding: 10,
-              borderRadius: 8,
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? colors.primaryDark : colors.primary,
+              paddingVertical: 14,
+              paddingHorizontal: 22,
+              borderRadius: 14,
               alignItems: 'center',
-            }}
+              transform: [{ scale: pressed ? 0.98 : 1 }],
+              ...(Platform.OS === 'web'
+                ? {
+                    boxShadow: pressed
+                      ? '0 4px 16px rgba(249, 115, 22, 0.28)'
+                      : '0 8px 28px rgba(249, 115, 22, 0.38)',
+                  }
+                : {}),
+              ...(Platform.OS === 'ios'
+                ? {
+                    shadowColor: colors.primary,
+                    shadowOffset: { width: 0, height: 6 },
+                    shadowOpacity: 0.35,
+                    shadowRadius: 10,
+                  }
+                : {}),
+              ...(Platform.OS === 'android' ? { elevation: pressed ? 3 : 5 } : {}),
+            })}
           >
-            <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>Enregistrer</Text>
+            <Text style={{ color: colors.text, fontFamily: fonts.semiBold, fontSize: 15 }}>
+              Enregistrer
+            </Text>
           </Pressable>
 
           <Pressable
             onPress={handleLogout}
-            style={{
-              backgroundColor: colors.danger,
-              padding: 10,
-              marginTop: 20,
-              borderRadius: 8,
+            style={({ pressed }) => ({
+              marginTop: 22,
+              paddingVertical: 14,
+              paddingHorizontal: 22,
+              borderRadius: 14,
               alignItems: 'center',
+              backgroundColor: pressed ? 'rgba(239, 68, 68, 0.22)' : 'rgba(239, 68, 68, 0.12)',
+              borderWidth: 1.5,
+              borderColor: 'rgba(239, 68, 68, 0.5)',
               opacity: loading ? 0.5 : 1,
-            }}
+              transform: [{ scale: pressed && !loading ? 0.98 : 1 }],
+            })}
             disabled={loading}
           >
-            <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>
+            <Text style={{ color: '#f87171', fontFamily: fonts.semiBold, fontSize: 15 }}>
               {loading ? 'Déconnexion...' : 'Logout'}
             </Text>
           </Pressable>

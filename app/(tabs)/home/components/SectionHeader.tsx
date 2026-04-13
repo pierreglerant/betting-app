@@ -18,16 +18,35 @@ export default function SectionHeader({ title, rightElement }: SectionHeaderProp
         marginBottom: 16,
       }}
     >
-      <Text
+      <View
         style={{
-          fontSize: 28,
-          color: colors.text,
-          fontFamily: fonts.display,
-          textTransform: 'uppercase',
+          flex: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginRight: rightElement ? 12 : 0,
         }}
       >
-        {title}
-      </Text>
+        <View
+          style={{
+            width: 4,
+            height: 36,
+            borderRadius: 2,
+            backgroundColor: colors.primary,
+            marginRight: 14,
+          }}
+        />
+        <Text
+          style={{
+            flex: 1,
+            fontSize: 28,
+            color: colors.text,
+            fontFamily: fonts.display,
+            textTransform: 'uppercase',
+          }}
+        >
+          {title}
+        </Text>
+      </View>
       {rightElement}
     </View>
   );
