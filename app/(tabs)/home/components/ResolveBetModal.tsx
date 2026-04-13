@@ -5,6 +5,7 @@ import React from 'react';
 import { Button, Text, View } from 'react-native';
 import { Bet } from '../types';
 import BaseModal from './BaseModal';
+import ModalTitle from './ModalTitle';
 
 type ResolveBetModalProps = {
   visible: boolean;
@@ -79,9 +80,7 @@ export default function ResolveBetModal({
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
-      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.display }}>
-        Gérer le pari
-      </Text>
+      <ModalTitle title="Gérer le pari" />
 
       {bet ? (
         <Text style={{ marginBottom: 15, color: colors.textMuted, fontFamily: fonts.medium }}>

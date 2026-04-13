@@ -16,8 +16,9 @@ export default function TabLayout() {
           backgroundColor: colors.background,
         },
         tabBarStyle: {
-          backgroundColor: colors.card,
-          borderTopColor: colors.border,
+          backgroundColor: 'transparent',
+          borderTopWidth: 0,
+          elevation: 0,
         },
         headerShown: false,
         tabBarButton: HapticTab,

@@ -6,6 +6,7 @@ import React from 'react';
 import { Button, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { UserLite } from '../types';
 import BaseModal from './BaseModal';
+import ModalTitle from './ModalTitle';
 
 type CreateBetModalProps = {
   visible: boolean;
@@ -100,9 +101,7 @@ export default function CreateBetModal({
 
   return (
     <BaseModal visible={visible} onClose={handleClose}>
-      <Text style={{ marginBottom: 10, color: colors.text, fontFamily: fonts.display }}>
-        Créer un pari
-      </Text>
+      <ModalTitle title="Créer un pari" />
 
       <TextInput
         placeholder="Titre"

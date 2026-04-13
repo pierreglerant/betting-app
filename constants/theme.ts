@@ -1,8 +1,8 @@
 export const colors = {
-  // Backgrounds
+  // Backgrounds (neutral gris — évite la légère dominante bleue du slate Tailwind)
   background: '#0b0f14',
-  card: '#111827',
-  cardSoft: '#1f2937',
+  card: '#181818',
+  cardSoft: '#252525',
 
   // Brand
   primary: '#f97316',
@@ -19,5 +19,5 @@ export const colors = {
   success: '#22c55e',
   danger: '#ef4444',
 
-  border: '#1f2937',
+  border: '#2e2e2e',
 } as const;

@@ -89,7 +89,7 @@ export default function HomeScreen() {
             fontFamily: fonts.display,
           }}
         >
-          Bienvenue {user.username} 🍻
+          {user.username}
         </Text>
       </View>
 
