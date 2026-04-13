@@ -6,7 +6,11 @@ import SectionHeader from './SectionHeader';
 
 type BetsSectionProps = {
   title: string;
-  rightElement?: React.ReactNode;
+  headerAction?: React.ReactNode;
+  /** Renders under the section title, above the list or empty state. */
+  belowHeader?: React.ReactNode;
+  showSeeAll?: boolean;
+  onSeeAll?: () => void;
   isEmpty: boolean;
   emptyMessage: string;
   children: React.ReactNode;
@@ -14,7 +18,10 @@ type BetsSectionProps = {
 
 export default function BetsSection({
   title,
-  rightElement,
+  headerAction,
+  belowHeader,
+  showSeeAll,
+  onSeeAll,
   isEmpty,
   emptyMessage,
   children,
@@ -27,7 +34,15 @@ export default function BetsSection({
         marginBottom: 20,
       }}
     >
-      <SectionHeader title={title} rightElement={rightElement} />
+      <SectionHeader
+        title={title}
+        headerAction={headerAction}
+        showSeeAll={showSeeAll}
+        onSeeAll={onSeeAll}
+        marginBottom={belowHeader ? 4 : 16}
+      />
+
+      {belowHeader ? <View style={{ marginBottom: 12 }}>{belowHeader}</View> : null}
 
       {isEmpty ? (
         <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>{emptyMessage}</Text>

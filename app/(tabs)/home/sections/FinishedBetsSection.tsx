@@ -1,42 +1,34 @@
-import { supabase } from '@/libs/supabase';
+import { useRouter } from 'expo-router';
 import React from 'react';
+import { SECTION_PREVIEW_LIMIT } from '@/constants/bets';
+import { useFinishedBetsData } from '../hooks/useBetQueries';
 import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
-import { Bet } from '../types';
 
 type FinishedBetsSectionProps = {
   refreshKey: number;
 };
 
 export default function FinishedBetsSection({ refreshKey }: FinishedBetsSectionProps) {
-  const [bets, setBets] = React.useState<Bet[]>([]);
-
-  const fetchFinishedBets = async () => {
-    const { data, error } = await supabase
-      .from('bets')
-      .select('*')
-      .eq('status', 'resolved')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching finished bets:', error);
-      return;
-    }
-
-    setBets(data || []);
-  };
+  const router = useRouter();
+  const { bets, reload } = useFinishedBetsData();
 
   React.useEffect(() => {
-    fetchFinishedBets();
-  }, [refreshKey]);
+    reload();
+  }, [reload, refreshKey]);
+
+  const preview = bets.slice(0, SECTION_PREVIEW_LIMIT);
+  const showSeeAll = bets.length > SECTION_PREVIEW_LIMIT;
 
   return (
     <BetsSection
       title="Paris cloturés"
+      showSeeAll={showSeeAll}
+      onSeeAll={() => router.push('/home/finished-all')}
       isEmpty={bets.length === 0}
       emptyMessage="Aucun pari cloturé"
     >
-      {bets.map((bet) => (
+      {preview.map((bet) => (
         <BetRow key={bet.id} title={bet.title} context={bet.context} deadline={bet.deadline} />
       ))}
     </BetsSection>

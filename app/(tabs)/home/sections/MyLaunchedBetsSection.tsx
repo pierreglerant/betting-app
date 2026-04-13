@@ -1,6 +1,8 @@
-import { supabase } from '@/libs/supabase';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable } from 'react-native';
+import { SECTION_PREVIEW_LIMIT } from '@/constants/bets';
+import { useMyLaunchedBetsData } from '../hooks/useBetQueries';
 import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
 import BetStatusBadge from '../components/BetStatusBadge';
@@ -18,33 +20,15 @@ export default function MyLaunchedBetsSection({
   refreshKey,
   onDataChanged,
 }: MyLaunchedBetsSectionProps) {
-  const [bets, setBets] = React.useState<Bet[]>([]);
-  const [manageModalVisible, setManageModalVisible] = React.useState(false);
-  const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);
-
-  const fetchMyLaunchedBets = React.useCallback(async () => {
-    const { data, error } = await supabase
-      .from('bets')
-      .select('*')
-      .eq('creator_id', userId)
-      .eq('status', 'open')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching my launched bets:', error);
-      return;
-    }
-
-    setBets(data || []);
-  }, [userId]);
+  const router = useRouter();
+  const { bets, reload } = useMyLaunchedBetsData(userId);
 
   React.useEffect(() => {
-    const loadMyLaunchedBets = async () => {
-      await fetchMyLaunchedBets();
-    };
+    reload();
+  }, [reload, refreshKey]);
 
-    loadMyLaunchedBets();
-  }, [fetchMyLaunchedBets, refreshKey]);
+  const [manageModalVisible, setManageModalVisible] = React.useState(false);
+  const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);
 
   const handleChanged = () => {
     setManageModalVisible(false);
@@ -52,14 +36,19 @@ export default function MyLaunchedBetsSection({
     onDataChanged();
   };
 
+  const preview = bets.slice(0, SECTION_PREVIEW_LIMIT);
+  const showSeeAll = bets.length > SECTION_PREVIEW_LIMIT;
+
   return (
     <>
       <BetsSection
-        title="Mes paris lancés"
+        title="Paris créés"
+        showSeeAll={showSeeAll}
+        onSeeAll={() => router.push('/home/my-launched-all')}
         isEmpty={bets.length === 0}
-        emptyMessage="Aucun pari lancé en cours"
+        emptyMessage="Aucun pari créé"
       >
-        {bets.map((bet) => (
+        {preview.map((bet) => (
           <BetRow
             key={bet.id}
             title={bet.title}

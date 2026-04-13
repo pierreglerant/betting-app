@@ -1,12 +1,16 @@
-import { supabase } from '@/libs/supabase';
+import { colors } from '@/constants/theme';
+import { fonts } from '@/constants/typography';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, Text } from 'react-native';
+import { SECTION_PREVIEW_LIMIT } from '@/constants/bets';
+import { useOpenBetsData } from '../hooks/useBetQueries';
 import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
 import BetStatusBadge from '../components/BetStatusBadge';
 import CreateBetModal from '../components/CreateBetModal';
 import PredictBetModal from '../components/PredictBetModal';
-import { Bet, BetUserStatus, UserLite } from '../types';
+import { Bet, BetUserStatus } from '../types';
 
 type OpenBetsSectionProps = {
   userId: string;
@@ -19,70 +23,16 @@ export default function OpenBetsSection({
   refreshKey,
   onDataChanged,
 }: OpenBetsSectionProps) {
-  const [openBets, setOpenBets] = React.useState<Bet[]>([]);
-  const [users, setUsers] = React.useState<UserLite[]>([]);
-  const [excludedSet, setExcludedSet] = React.useState<Set<string>>(new Set());
-  const [predictedSet, setPredictedSet] = React.useState<Set<string>>(new Set());
+  const router = useRouter();
+  const { openBets, users, excludedSet, predictedSet, reload } = useOpenBetsData(userId);
+
+  React.useEffect(() => {
+    reload();
+  }, [reload, refreshKey]);
+
   const [createModalVisible, setCreateModalVisible] = React.useState(false);
   const [predictionModalVisible, setPredictionModalVisible] = React.useState(false);
   const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);
-
-  const fetchOpenBets = React.useCallback(async () => {
-    const { data, error } = await supabase
-      .from('bets')
-      .select('*')
-      .eq('status', 'open')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching open bets:', error);
-      return;
-    }
-
-    setOpenBets(data || []);
-  }, []);
-
-  const fetchUsers = React.useCallback(async () => {
-    const { data, error } = await supabase.from('users').select('id, username');
-
-    if (error) {
-      console.error('Error fetching users:', error);
-      return;
-    }
-
-    setUsers(data || []);
-  }, []);
-
-  const fetchUserStatus = React.useCallback(async () => {
-    const { data: excluded, error: excludedError } = await supabase
-      .from('bet_tags')
-      .select('bet_id')
-      .eq('user_id', userId);
-
-    const { data: predicted, error: predictedError } = await supabase
-      .from('predictions')
-      .select('bet_id')
-      .eq('user_id', userId);
-
-    if (excludedError) {
-      console.error('Error fetching excluded bets:', excludedError);
-    }
-
-    if (predictedError) {
-      console.error('Error fetching predictions:', predictedError);
-    }
-
-    setExcludedSet(new Set((excluded || []).map((e) => e.bet_id)));
-    setPredictedSet(new Set((predicted || []).map((p) => p.bet_id)));
-  }, [userId]);
-
-  React.useEffect(() => {
-    const loadAll = async () => {
-      await Promise.all([fetchOpenBets(), fetchUsers(), fetchUserStatus()]);
-    };
-
-    loadAll();
-  }, [fetchOpenBets, fetchUsers, fetchUserStatus, refreshKey]);
 
   const getStatus = (bet: Bet): BetUserStatus => {
     if (excludedSet.has(bet.id)) return 'excluded';
@@ -121,19 +71,30 @@ export default function OpenBetsSection({
     return <BetStatusBadge status={status} />;
   };
 
+  const preview = openBets.slice(0, SECTION_PREVIEW_LIMIT);
+  const showSeeAll = openBets.length > SECTION_PREVIEW_LIMIT;
+
   return (
     <>
       <BetsSection
         title="Paris en cours"
-        rightElement={
-          <Pressable onPress={() => setCreateModalVisible(true)}>
-            <BetStatusBadge status="manage" />
+        belowHeader={
+          <Pressable
+            onPress={() => setCreateModalVisible(true)}
+            hitSlop={10}
+            style={{ alignSelf: 'flex-start', marginLeft: 18 }}
+          >
+            <Text style={{ color: colors.primary, fontFamily: fonts.semiBold, fontSize: 14 }}>
+              Créer un pari
+            </Text>
           </Pressable>
         }
+        showSeeAll={showSeeAll}
+        onSeeAll={() => router.push('/home/open-bets-all')}
         isEmpty={openBets.length === 0}
         emptyMessage="Aucun pari en cours"
       >
-        {openBets.map((bet) => (
+        {preview.map((bet) => (
           <BetRow
             key={bet.id}
             title={bet.title}

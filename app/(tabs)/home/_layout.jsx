@@ -10,6 +10,9 @@ export default function HomeLayout() {
       }}
     >
       <Stack.Screen name="index" />
+      <Stack.Screen name="open-bets-all" />
+      <Stack.Screen name="my-launched-all" />
+      <Stack.Screen name="finished-all" />
     </Stack>
   );
 }
