@@ -33,9 +33,9 @@ export default function FinishedBetsSection({ refreshKey }: FinishedBetsSectionP
 
   return (
     <BetsSection
-      title="Historique des paris finis"
+      title="Paris cloturés"
       isEmpty={bets.length === 0}
-      emptyMessage="Aucun pari fini"
+      emptyMessage="Aucun pari cloturé"
     >
       {bets.map((bet) => (
         <BetRow
