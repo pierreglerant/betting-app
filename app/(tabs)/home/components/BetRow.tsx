@@ -14,10 +14,12 @@ export default function BetRow({ title, context, deadline, rightElement }: BetRo
   return (
     <View
       style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
+        backgroundColor: colors.card,
+        borderColor: colors.border,
+        borderWidth: 1,
+        padding: 20,
+        borderRadius: 12,
+        marginBottom: 20,
       }}
     >
       <View style={{ flex: 1, marginRight: 12 }}>

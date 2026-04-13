@@ -126,10 +126,7 @@ export default function OpenBetsSection({
   return (
     <View
       style={{
-        backgroundColor: colors.card,
-        borderColor: colors.border,
-        borderWidth: 1,
-        padding: 20,
+        padding: 10,
         borderRadius: 12,
         marginBottom: 20,
       }}
