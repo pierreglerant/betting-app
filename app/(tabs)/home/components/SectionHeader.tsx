@@ -20,7 +20,7 @@ export default function SectionHeader({ title, rightElement }: SectionHeaderProp
     >
       <Text
         style={{
-          fontSize: 18,
+          fontSize: 28,
           color: colors.text,
           fontFamily: fonts.display,
           textTransform: 'uppercase',

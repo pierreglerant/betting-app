@@ -1,5 +1,6 @@
 import { colors } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/contexts/auth-context';
+import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import {
   Manrope_400Regular,
   Manrope_500Medium,
@@ -8,7 +9,6 @@ import {
   Manrope_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/manrope';
-import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
