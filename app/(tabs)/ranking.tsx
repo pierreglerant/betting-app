@@ -19,18 +19,29 @@ const fakeRanking = [
 export default function RankingScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
-      {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 15,
+          paddingTop: 40,
+          marginHorizontal: -20,
+          marginTop: -20,
+          marginBottom: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        }}
+      >
         <MaterialCommunityIcons
           name="trophy-outline"
-          size={26}
+          size={40}
           color={colors.primary}
-          style={{ marginRight: 10 }}
+          style={{ marginRight: 12 }}
         />
 
         <Text
           style={{
-            fontSize: 28,
+            fontSize: 24,
             color: colors.text,
             fontFamily: fonts.display,
             textTransform: 'uppercase',
