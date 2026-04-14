@@ -54,9 +54,11 @@ export default function HomeScreen() {
         }}
       >
         <Pressable
-          onPress={() => router.push('/account')}
+          onPress={() => router.push('/home/account')}
           style={({ pressed }) => ({
             opacity: pressed ? 0.6 : 1,
+            flexDirection: 'row',
+            alignItems: 'center',
           })}
         >
           {user.avatar_url ? (
@@ -84,17 +86,17 @@ export default function HomeScreen() {
               <Text style={{ fontFamily: fonts.medium }}>👤</Text>
             </View>
           )}
-        </Pressable>
 
-        <Text
-          style={{
-            fontSize: 24,
-            color: colors.text,
-            fontFamily: fonts.display,
-          }}
-        >
-          {user.username}
-        </Text>
+          <Text
+            style={{
+              fontSize: 24,
+              color: colors.text,
+              fontFamily: fonts.display,
+            }}
+          >
+            {user.username}
+          </Text>
+        </Pressable>
         <View
           style={{
             marginLeft: 'auto',
