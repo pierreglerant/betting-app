@@ -201,72 +201,58 @@ export default function AccountScreen() {
               </Pressable>
             </View>
 
-            <TextInput
-              value={username}
-              onChangeText={setUsername}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.border,
-                color: colors.text,
-                backgroundColor: colors.card,
-                borderRadius: 8,
-                padding: 10,
-                marginBottom: 10,
-                fontFamily: fonts.regular,
-              }}
-              placeholderTextColor={colors.textMuted}
-            />
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20, alignItems: 'center' }}>
+              <TextInput
+                value={username}
+                onChangeText={setUsername}
+                style={{
+                  flex: 1,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  color: colors.text,
+                  backgroundColor: colors.card,
+                  borderRadius: 8,
+                  padding: 12,
+                  fontFamily: fonts.regular,
+                }}
+                placeholderTextColor={colors.textMuted}
+              />
 
-            <Pressable
-              onPress={updateUsername}
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? colors.primaryDark : colors.primary,
-                paddingVertical: 14,
-                paddingHorizontal: 22,
-                borderRadius: 14,
-                alignItems: 'center',
-                transform: [{ scale: pressed ? 0.98 : 1 }],
-                ...(Platform.OS === 'web'
-                  ? {
-                      boxShadow: pressed
-                        ? '0 4px 16px rgba(249, 115, 22, 0.28)'
-                        : '0 8px 28px rgba(249, 115, 22, 0.38)',
-                    }
-                  : {}),
-                ...(Platform.OS === 'ios'
-                  ? {
-                      shadowColor: colors.primary,
-                      shadowOffset: { width: 0, height: 6 },
-                      shadowOpacity: 0.35,
-                      shadowRadius: 10,
-                    }
-                  : {}),
-                ...(Platform.OS === 'android' ? { elevation: pressed ? 3 : 5 } : {}),
-              })}
-            >
-              <Text style={{ color: colors.text, fontFamily: fonts.semiBold, fontSize: 15 }}>
-                Enregistrer
-              </Text>
-            </Pressable>
+              <Pressable
+                onPress={updateUsername}
+                style={({ pressed }) => ({
+                  backgroundColor: colors.primary,
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: pressed ? 0.8 : 1,
+                })}
+              >
+                <Text style={{ color: colors.text, fontFamily: fonts.semiBold, fontSize: 14 }}>
+                  Enregistrer
+                </Text>
+              </Pressable>
+            </View>
 
             <Pressable
               onPress={handleLogout}
               style={({ pressed }) => ({
-                marginTop: 22,
-                paddingVertical: 14,
-                paddingHorizontal: 22,
-                borderRadius: 14,
+                marginTop: 16,
+                paddingVertical: 12,
+                paddingHorizontal: 16,
+                borderRadius: 10,
                 alignItems: 'center',
-                backgroundColor: pressed ? 'rgba(239, 68, 68, 0.22)' : 'rgba(239, 68, 68, 0.12)',
+                backgroundColor: 'transparent',
                 borderWidth: 1.5,
-                borderColor: 'rgba(239, 68, 68, 0.5)',
-                opacity: loading ? 0.5 : 1,
-                transform: [{ scale: pressed && !loading ? 0.98 : 1 }],
+                borderColor: '#ef4444',
+                opacity: loading ? 0.5 : pressed ? 0.85 : 1,
               })}
               disabled={loading}
             >
-              <Text style={{ color: '#f87171', fontFamily: fonts.semiBold, fontSize: 15 }}>
-                {loading ? 'Déconnexion...' : 'Logout'}
+              <Text style={{ color: '#ef4444', fontFamily: fonts.semiBold, fontSize: 14 }}>
+                {loading ? 'Déconnexion...' : 'Déconnexion'}
               </Text>
             </Pressable>
           </View>
