@@ -1,5 +1,19 @@
 import { supabase } from '@/infrastructure/db/api/supabase';
 
+export async function getUsers() {
+  const { data, error } = await supabase.rpc('get_users');
+
+  if (error) {
+    throw error;
+  }
+
+  if (data == null) {
+    return [];
+  }
+
+  return Array.isArray(data) ? data : [data];
+}
+
 export async function getUserByUsername(username: string) {
   const { data, error } = await supabase.rpc('get_user', { p_username: username });
 

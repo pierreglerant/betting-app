@@ -1,33 +1,27 @@
 import { supabase } from '@/libs/supabase';
 import { useCallback, useState } from 'react';
-import { Bet, UserLite } from '../types';
+import { Bet } from '../types';
 
 export function useOpenBetsData(userId: string | undefined) {
   const [openBets, setOpenBets] = useState<Bet[]>([]);
-  const [users, setUsers] = useState<UserLite[]>([]);
   const [excludedSet, setExcludedSet] = useState<Set<string>>(new Set());
   const [predictedSet, setPredictedSet] = useState<Set<string>>(new Set());
 
   const reload = useCallback(async () => {
     if (!userId) return;
 
-    const [betsRes, usersRes, excludedRes, predictedRes] = await Promise.all([
+    const [betsRes, excludedRes, predictedRes] = await Promise.all([
       supabase
         .from('bets')
         .select('*')
         .eq('status', 'open')
         .order('created_at', { ascending: false }),
-      supabase.from('users').select('id, username'),
       supabase.from('bet_tags').select('bet_id').eq('user_id', userId),
       supabase.from('predictions').select('bet_id').eq('user_id', userId),
     ]);
 
     if (betsRes.error) {
       console.error('Error fetching open bets:', betsRes.error);
-      return;
-    }
-    if (usersRes.error) {
-      console.error('Error fetching users:', usersRes.error);
       return;
     }
     if (excludedRes.error) {
@@ -38,12 +32,11 @@ export function useOpenBetsData(userId: string | undefined) {
     }
 
     setOpenBets(betsRes.data || []);
-    setUsers(usersRes.data || []);
     setExcludedSet(new Set((excludedRes.data || []).map((e) => e.bet_id)));
     setPredictedSet(new Set((predictedRes.data || []).map((p) => p.bet_id)));
   }, [userId]);
 
-  return { openBets, users, excludedSet, predictedSet, reload };
+  return { openBets, excludedSet, predictedSet, reload };
 }
 
 export function useMyLaunchedBetsData(userId: string | undefined) {

@@ -2,9 +2,10 @@ import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
 import { Bet as DomainBet } from '@/domain/entities/Bet';
+import { useAllUsers } from '@/presentation/hooks/useAllUsers';
 import { useCreateBet } from '@/presentation/hooks/useCreateBet';
 import React from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
 
@@ -43,30 +44,36 @@ type CreateBetModalProps = {
 
 export default function CreateBetModal({ visible, onClose, onCreated }: CreateBetModalProps) {
   const { user } = useAuth();
+  const { users, loading: usersLoading, reload: reloadUsers } = useAllUsers();
   const { create, loading, error: createError } = useCreateBet();
   const [newTitle, setNewTitle] = React.useState('');
   const [newContext, setNewContext] = React.useState('');
-  const [optionA, setOptionA] = React.useState('');
-  const [optionB, setOptionB] = React.useState('');
+  const [yesNoOptions, setYesNoOptions] = React.useState(true);
+  const [selectedOptionUserIds, setSelectedOptionUserIds] = React.useState<string[]>([]);
   const [closingDay, setClosingDay] = React.useState('');
   const [closingTime, setClosingTime] = React.useState('');
   const [errors, setErrors] = React.useState({
     title: false,
     context: false,
-    optionA: false,
-    optionB: false,
+    customOptions: false,
     closingDate: false,
   });
   const [sessionError, setSessionError] = React.useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (visible && !yesNoOptions) {
+      void reloadUsers();
+    }
+  }, [visible, yesNoOptions, reloadUsers]);
+
   const resetForm = () => {
     setNewTitle('');
     setNewContext('');
-    setOptionA('');
-    setOptionB('');
+    setYesNoOptions(true);
+    setSelectedOptionUserIds([]);
     setClosingDay('');
     setClosingTime('');
-    setErrors({ title: false, context: false, optionA: false, optionB: false, closingDate: false });
+    setErrors({ title: false, context: false, customOptions: false, closingDate: false });
     setSessionError(null);
   };
 
@@ -80,18 +87,37 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
 
     const titleError = !newTitle.trim();
     const contextError = !newContext.trim();
-    const optionAError = !optionA.trim();
-    const optionBError = !optionB.trim();
 
     setErrors({
       title: titleError,
       context: contextError,
-      optionA: optionAError,
-      optionB: optionBError,
+      customOptions: false,
       closingDate: false,
     });
 
-    if (titleError || contextError || optionAError || optionBError) return;
+    if (titleError || contextError) return;
+
+    let customOptionsError = false;
+    let optionValues: string[] = [];
+
+    if (yesNoOptions) {
+      optionValues = ['Oui', 'Non'];
+    } else {
+      if (selectedOptionUserIds.length < 2) {
+        customOptionsError = true;
+      } else {
+        optionValues = selectedOptionUserIds
+          .map((id) => users.find((u) => u.id === id)?.username)
+          .filter((s): s is string => !!s?.trim());
+        if (optionValues.length < 2) customOptionsError = true;
+      }
+    }
+
+    if (customOptionsError) {
+      setErrors((e) => ({ ...e, customOptions: true }));
+      setSessionError('Sélectionne au moins deux participants comme options.');
+      return;
+    }
 
     if (!user?.id) {
       setSessionError('Session invalide. Reconnecte-toi.');
@@ -125,7 +151,7 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
     };
 
     try {
-      await create(draftBet, [optionA.trim(), optionB.trim()], user.id);
+      await create(draftBet, optionValues, user.id);
       resetForm();
       onClose();
       onCreated();
@@ -175,39 +201,126 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
         placeholderTextColor={colors.textMuted}
       />
 
-      <TextInput
-        placeholder="Option 1 (ex. Oui)"
-        value={optionA}
-        onChangeText={setOptionA}
-        style={{
-          borderWidth: 1,
-          borderColor: errors.optionA ? colors.danger : colors.border,
-          padding: 10,
-          marginBottom: 10,
-          borderRadius: 8,
-          backgroundColor: colors.cardSoft,
-          color: colors.text,
-          fontFamily: fonts.regular,
+      <Pressable
+        onPress={() => {
+          setYesNoOptions((v) => {
+            const next = !v;
+            if (next) setSelectedOptionUserIds([]);
+            return next;
+          });
+          setSessionError(null);
+          setErrors((e) => ({ ...e, customOptions: false }));
         }}
-        placeholderTextColor={colors.textMuted}
-      />
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: 12,
+        }}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: yesNoOptions }}
+      >
+        <View
+          style={{
+            width: 22,
+            height: 22,
+            marginRight: 10,
+            borderWidth: 2,
+            borderColor: errors.customOptions ? colors.danger : colors.border,
+            borderRadius: 4,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: yesNoOptions ? colors.primary : 'transparent',
+          }}
+        >
+          {yesNoOptions ? (
+            <Text style={{ color: colors.text, fontSize: 13, fontFamily: fonts.semiBold }}>
+              {'\u2713'}
+            </Text>
+          ) : null}
+        </View>
+        <Text style={{ fontFamily: fonts.medium, color: colors.text, flex: 1 }}>
+          Choix Oui / Non
+        </Text>
+      </Pressable>
 
-      <TextInput
-        placeholder="Option 2 (ex. Non)"
-        value={optionB}
-        onChangeText={setOptionB}
-        style={{
-          borderWidth: 1,
-          borderColor: errors.optionB ? colors.danger : colors.border,
-          padding: 10,
-          marginBottom: 10,
-          borderRadius: 8,
-          backgroundColor: colors.cardSoft,
-          color: colors.text,
-          fontFamily: fonts.regular,
-        }}
-        placeholderTextColor={colors.textMuted}
-      />
+      {!yesNoOptions ? (
+        <>
+          <Text
+            style={{
+              marginBottom: 6,
+              color: colors.textMuted,
+              fontFamily: fonts.medium,
+              fontSize: 13,
+            }}
+          >
+            Options du pari (pseudos) — au moins 2
+          </Text>
+          <ScrollView
+            style={{
+              maxHeight: 160,
+              marginBottom: 10,
+              borderWidth: 1,
+              borderColor: errors.customOptions ? colors.danger : colors.border,
+              borderRadius: 8,
+              backgroundColor: colors.cardSoft,
+            }}
+            nestedScrollEnabled
+          >
+            {usersLoading ? (
+              <Text
+                style={{
+                  padding: 12,
+                  color: colors.textMuted,
+                  fontFamily: fonts.regular,
+                }}
+              >
+                Chargement des utilisateurs…
+              </Text>
+            ) : users.length === 0 ? (
+              <Text
+                style={{
+                  padding: 12,
+                  color: colors.textMuted,
+                  fontFamily: fonts.regular,
+                }}
+              >
+                Aucun utilisateur chargé.
+              </Text>
+            ) : (
+              users.map((u) => {
+                const selected = selectedOptionUserIds.includes(u.id);
+                return (
+                  <Pressable
+                    key={u.id}
+                    onPress={() => {
+                      setSelectedOptionUserIds((prev) =>
+                        prev.includes(u.id) ? prev.filter((x) => x !== u.id) : [...prev, u.id],
+                      );
+                      setErrors((e) => ({ ...e, customOptions: false }));
+                      setSessionError(null);
+                    }}
+                    style={{
+                      padding: 12,
+                      borderBottomWidth: 1,
+                      borderBottomColor: colors.border,
+                      backgroundColor: selected ? colors.primary : 'transparent',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: selected ? colors.text : colors.textMuted,
+                        fontFamily: selected ? fonts.semiBold : fonts.regular,
+                      }}
+                    >
+                      {u.username}
+                    </Text>
+                  </Pressable>
+                );
+              })
+            )}
+          </ScrollView>
+        </>
+      ) : null}
 
       <Text
         style={{
