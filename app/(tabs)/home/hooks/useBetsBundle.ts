@@ -17,14 +17,14 @@ export function useBetsBundle(userId: string | undefined, refreshKey: number) {
 
     const [excludedRes, predictedRes] = await Promise.all([
       supabase.from('bet_tags').select('bet_id').eq('user_id', userId),
-      supabase.from('predictions').select('bet_id').eq('user_id', userId),
+      supabase.from('user_bet').select('bet_id').eq('user_id', userId).eq('is_creator', false),
     ]);
 
     if (excludedRes.error) {
       console.error('Error fetching excluded bets:', excludedRes.error);
     }
     if (predictedRes.error) {
-      console.error('Error fetching predictions:', predictedRes.error);
+      console.error('Error fetching user_bet wagers:', predictedRes.error);
     }
 
     setExcludedSet(new Set((excludedRes.data || []).map((e) => e.bet_id)));

@@ -2,8 +2,9 @@ import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
-import { Button, Text, View } from 'react-native';
+import { ActivityIndicator, Button, Pressable, ScrollView, Text, View } from 'react-native';
 import { Bet } from '../types';
+import { fetchBetOptions, type BetOptionRow } from '../utils/fetchBetOptions';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
 
@@ -20,14 +21,46 @@ export default function ResolveBetModal({
   onClose,
   onChanged,
 }: ResolveBetModalProps) {
-  const resolveBet = async (result: 'yes' | 'no') => {
+  const [options, setOptions] = React.useState<BetOptionRow[]>([]);
+  const [optionsLoading, setOptionsLoading] = React.useState(false);
+  const [optionsError, setOptionsError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!visible || !bet?.id) {
+      setOptions([]);
+      setOptionsError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setOptionsLoading(true);
+    setOptionsError(null);
+
+    void (async () => {
+      const { options: next, error } = await fetchBetOptions(supabase, bet.id);
+      if (cancelled) return;
+      setOptionsLoading(false);
+      if (error) {
+        setOptionsError(error);
+        setOptions([]);
+        return;
+      }
+      setOptions(next);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [visible, bet?.id]);
+
+  const resolveBet = async (winning: BetOptionRow) => {
     if (!bet) return;
 
     const { error } = await supabase
-      .from('bets')
+      .from('bet')
       .update({
-        status: 'resolved',
-        result,
+        result: winning.value,
+        is_open: false,
       })
       .eq('id', bet.id);
 
@@ -67,7 +100,7 @@ export default function ResolveBetModal({
       return;
     }
 
-    const { error: betError } = await supabase.from('bets').delete().eq('id', bet.id);
+    const { error: betError } = await supabase.from('bet').delete().eq('id', bet.id);
 
     if (betError) {
       console.error('Error deleting bet:', betError);
@@ -88,15 +121,41 @@ export default function ResolveBetModal({
         </Text>
       ) : null}
 
-      <View style={{ marginBottom: 10 }}>
-        <Button title="Résultat : Oui" onPress={() => resolveBet('yes')} color={colors.success} />
-      </View>
+      <Text style={{ marginBottom: 8, color: colors.text, fontFamily: fonts.semiBold }}>
+        Résultat gagnant
+      </Text>
 
-      <View style={{ marginBottom: 10 }}>
-        <Button title="Résultat : Non" onPress={() => resolveBet('no')} color={colors.primary} />
-      </View>
+      {optionsLoading ? (
+        <ActivityIndicator color={colors.primary} style={{ marginVertical: 12 }} />
+      ) : optionsError ? (
+        <Text style={{ color: colors.danger, fontFamily: fonts.medium, marginBottom: 8 }}>
+          {optionsError}
+        </Text>
+      ) : (
+        <ScrollView style={{ maxHeight: 260 }} keyboardShouldPersistTaps="handled">
+          {options.map((opt) => (
+            <Pressable
+              key={opt.id}
+              onPress={() => resolveBet(opt)}
+              style={{
+                paddingVertical: 10,
+                paddingHorizontal: 12,
+                borderRadius: 8,
+                marginBottom: 8,
+                borderWidth: 1,
+                borderColor: colors.border,
+                backgroundColor: colors.cardSoft,
+              }}
+            >
+              <Text style={{ color: colors.text, fontFamily: fonts.medium }}>{opt.value}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
 
-      <Button title="Supprimer le pari" onPress={deleteBet} color={colors.danger} />
+      <View style={{ marginTop: 16 }}>
+        <Button title="Supprimer le pari" onPress={deleteBet} color={colors.danger} />
+      </View>
     </BaseModal>
   );
 }

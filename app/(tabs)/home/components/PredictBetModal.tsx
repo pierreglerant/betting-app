@@ -2,8 +2,17 @@ import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
-import { Button, Text, TextInput, View } from 'react-native';
-import { Bet, PredictionChoice } from '../types';
+import {
+  ActivityIndicator,
+  Button,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { Bet } from '../types';
+import { fetchBetOptions, type BetOptionRow } from '../utils/fetchBetOptions';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
 
@@ -22,37 +31,65 @@ export default function PredictBetModal({
   onClose,
   onPredicted,
 }: PredictBetModalProps) {
-  const [choice, setChoice] = React.useState<PredictionChoice | null>(null);
+  const [options, setOptions] = React.useState<BetOptionRow[]>([]);
+  const [optionsLoading, setOptionsLoading] = React.useState(false);
+  const [optionsError, setOptionsError] = React.useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = React.useState<BetOptionRow | null>(null);
   const [amount, setAmount] = React.useState('');
 
   React.useEffect(() => {
-    if (!visible) {
-      setChoice(null);
+    if (!visible || !bet?.id) {
+      setOptions([]);
+      setOptionsError(null);
+      setSelectedOption(null);
       setAmount('');
+      return;
     }
-  }, [visible]);
+
+    let cancelled = false;
+    setOptionsLoading(true);
+    setOptionsError(null);
+
+    void (async () => {
+      const { options: next, error } = await fetchBetOptions(supabase, bet.id);
+      if (cancelled) return;
+      setOptionsLoading(false);
+      if (error) {
+        setOptionsError(error);
+        setOptions([]);
+        return;
+      }
+      setOptions(next);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [visible, bet?.id]);
 
   const handlePredict = async () => {
-    if (!bet || !choice || !amount.trim()) return;
+    if (!bet || !selectedOption || !amount.trim()) return;
 
     const parsedAmount = parseInt(amount, 10);
-    if (Number.isNaN(parsedAmount)) return;
+    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) return;
 
-    const { error } = await supabase.from('predictions').insert({
-      bet_id: bet.id,
-      user_id: userId,
-      choice,
-      amount: parsedAmount,
+    const { error } = await supabase.rpc('place_bet', {
+      p_user_id: userId,
+      p_bet_id: bet.id,
+      p_option_id: selectedOption.id,
+      p_points: parsedAmount,
     });
 
     if (error) {
-      console.error('Error creating prediction:', error);
+      console.error('Error place_bet:', error);
       return;
     }
 
     onClose();
     onPredicted();
   };
+
+  const selectedLabel = selectedOption?.value ?? '—';
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
@@ -64,17 +101,43 @@ export default function PredictBetModal({
         </Text>
       ) : null}
 
-      <View style={{ flexDirection: 'row', gap: 10 }}>
-        <Button title="Oui" onPress={() => setChoice('yes')} color={colors.success} />
-        <Button title="Non" onPress={() => setChoice('no')} color={colors.danger} />
-      </View>
+      {optionsLoading ? (
+        <ActivityIndicator color={colors.primary} style={{ marginVertical: 12 }} />
+      ) : optionsError ? (
+        <Text style={{ color: colors.danger, fontFamily: fonts.medium, marginBottom: 8 }}>
+          {optionsError}
+        </Text>
+      ) : (
+        <ScrollView style={{ maxHeight: 220 }} keyboardShouldPersistTaps="handled">
+          {options.map((opt, index) => {
+            const selected = selectedOption != null && selectedOption.id === opt.id;
+            return (
+              <Pressable
+                key={`${opt.id}-${index}`}
+                onPress={() => setSelectedOption(opt)}
+                style={{
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderRadius: 8,
+                  marginBottom: 8,
+                  borderWidth: 1,
+                  borderColor: selected ? colors.primary : colors.border,
+                  backgroundColor: selected ? colors.cardSoft : colors.card,
+                }}
+              >
+                <Text style={{ color: colors.text, fontFamily: fonts.medium }}>{opt.value}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      )}
 
       <Text style={{ marginTop: 10, color: colors.textMuted, fontFamily: fonts.medium }}>
-        Choix : {choice === 'yes' ? 'Oui' : choice === 'no' ? 'Non' : '-'}
+        Choix : {selectedLabel}
       </Text>
 
       <TextInput
-        placeholder="Montant"
+        placeholder="Points"
         value={amount}
         onChangeText={setAmount}
         keyboardType="numeric"

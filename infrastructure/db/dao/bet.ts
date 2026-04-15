@@ -36,7 +36,7 @@ export async function getBetCommentsByBetId(betId: string) {
 }
 
 export async function getBetOptionsByBetId(betId: string) {
-  const { data, error } = await supabase.rpc('get_bet_options', { p_bet_id: betId });
+  const { data, error } = await supabase.rpc('get_bet_options', { bet_id: betId });
 
   if (error) {
     throw error;
