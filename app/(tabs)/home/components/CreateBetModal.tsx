@@ -3,11 +3,37 @@ import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
 import { Bet as DomainBet } from '@/domain/entities/Bet';
 import { useCreateBet } from '@/presentation/hooks/useCreateBet';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import React from 'react';
-import { Button, Platform, Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
+
+/** Jour AAAA-MM-JJ + heure HH:mm optionnelle (si jour seul : fin de journée locale). */
+function buildOptionalEndDate(dayStr: string, timeStr: string): Date | null {
+  const day = dayStr.trim();
+  if (!day) return null;
+
+  const dm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
+  if (!dm) return null;
+  const y = Number(dm[1]);
+  const mo = Number(dm[2]);
+  const d = Number(dm[3]);
+
+  const time = timeStr.trim();
+  let hh = 23;
+  let mm = 59;
+  if (time) {
+    const tm = /^(\d{1,2}):(\d{2})$/.exec(time);
+    if (!tm) return null;
+    hh = Number(tm[1]);
+    mm = Number(tm[2]);
+    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+  }
+
+  const date = new Date(y, mo - 1, d, hh, mm, 0, 0);
+  if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) return null;
+  return date;
+}
 
 type CreateBetModalProps = {
   visible: boolean;
@@ -22,13 +48,14 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
   const [newContext, setNewContext] = React.useState('');
   const [optionA, setOptionA] = React.useState('');
   const [optionB, setOptionB] = React.useState('');
-  const [deadline, setDeadline] = React.useState<Date | null>(null);
-  const [showDatePicker, setShowDatePicker] = React.useState(false);
+  const [closingDay, setClosingDay] = React.useState('');
+  const [closingTime, setClosingTime] = React.useState('');
   const [errors, setErrors] = React.useState({
     title: false,
     context: false,
     optionA: false,
     optionB: false,
+    closingDate: false,
   });
   const [sessionError, setSessionError] = React.useState<string | null>(null);
 
@@ -37,9 +64,9 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
     setNewContext('');
     setOptionA('');
     setOptionB('');
-    setDeadline(null);
-    setErrors({ title: false, context: false, optionA: false, optionB: false });
-    setShowDatePicker(false);
+    setClosingDay('');
+    setClosingTime('');
+    setErrors({ title: false, context: false, optionA: false, optionB: false, closingDate: false });
     setSessionError(null);
   };
 
@@ -61,6 +88,7 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
       context: contextError,
       optionA: optionAError,
       optionB: optionBError,
+      closingDate: false,
     });
 
     if (titleError || contextError || optionAError || optionBError) return;
@@ -70,11 +98,26 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
       return;
     }
 
+    const hasDay = !!closingDay.trim();
+    const hasTime = !!closingTime.trim();
+    if (hasTime && !hasDay) {
+      setSessionError('Indique le jour de fermeture pour utiliser une heure.');
+      return;
+    }
+
+    const endDate = buildOptionalEndDate(closingDay, closingTime);
+    if (hasDay && !endDate) {
+      setErrors((e) => ({ ...e, closingDate: true }));
+      setSessionError('Date ou heure invalide (AAAA-MM-JJ, heure HH:mm).');
+      return;
+    }
+    setErrors((e) => ({ ...e, closingDate: false }));
+
     const draftBet: DomainBet = {
       id: '',
       title: newTitle.trim(),
       context: newContext.trim(),
-      endDate: deadline,
+      endDate,
       isOpen: true,
       result: null,
       resultImageUrl: null,
@@ -166,23 +209,61 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
         placeholderTextColor={colors.textMuted}
       />
 
-      <Button
-        title={deadline ? deadline.toLocaleDateString() : 'Choisir une date'}
-        onPress={() => setShowDatePicker(true)}
-        color={colors.primary}
+      <Text
+        style={{
+          marginBottom: 4,
+          color: colors.textMuted,
+          fontFamily: fonts.medium,
+          fontSize: 13,
+        }}
+      >
+        Jour de fermeture (optionnel)
+      </Text>
+      <TextInput
+        placeholder="AAAA-MM-JJ"
+        value={closingDay}
+        onChangeText={setClosingDay}
+        autoCapitalize="none"
+        style={{
+          borderWidth: 1,
+          borderColor: errors.closingDate ? colors.danger : colors.border,
+          padding: 10,
+          marginBottom: 10,
+          borderRadius: 8,
+          backgroundColor: colors.cardSoft,
+          color: colors.text,
+          fontFamily: fonts.regular,
+        }}
+        placeholderTextColor={colors.textMuted}
       />
 
-      {showDatePicker ? (
-        <DateTimePicker
-          value={deadline || new Date()}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(event, date) => {
-            setShowDatePicker(false);
-            if (date) setDeadline(date);
-          }}
-        />
-      ) : null}
+      <Text
+        style={{
+          marginBottom: 4,
+          color: colors.textMuted,
+          fontFamily: fonts.medium,
+          fontSize: 13,
+        }}
+      >
+        Heure de fermeture (optionnel)
+      </Text>
+      <TextInput
+        placeholder="HH:mm"
+        value={closingTime}
+        onChangeText={setClosingTime}
+        autoCapitalize="none"
+        style={{
+          borderWidth: 1,
+          borderColor: errors.closingDate ? colors.danger : colors.border,
+          padding: 10,
+          marginBottom: 10,
+          borderRadius: 8,
+          backgroundColor: colors.cardSoft,
+          color: colors.text,
+          fontFamily: fonts.regular,
+        }}
+        placeholderTextColor={colors.textMuted}
+      />
 
       {sessionError || createError ? (
         <Text
