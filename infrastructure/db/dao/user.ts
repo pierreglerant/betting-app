@@ -14,6 +14,27 @@ export async function getUsers() {
   return Array.isArray(data) ? data : [data];
 }
 
+export async function getUserStatistics(userId: string) {
+  const { data, error } = await supabase.rpc('get_user_statistics', { p_user_id: userId });
+
+  if (error) {
+    throw error;
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+  return row && typeof row === 'object' ? (row as Record<string, unknown>) : null;
+}
+
+export async function getUserPoints(userId: string) {
+  const { data, error } = await supabase.from('users').select('points').eq('id', userId).single();
+
+  if (error) {
+    throw error;
+  }
+
+  return Number(data?.points ?? 0) || 0;
+}
+
 export async function getUserByUsername(username: string) {
   const { data, error } = await supabase.rpc('get_user', { p_username: username });
 

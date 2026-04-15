@@ -4,9 +4,9 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SectionHeader from '../components/SectionHeader';
-import { useUserStatisticsData } from '../hooks/useBetQueries';
+import { useUserStatistics } from '@/presentation/hooks/useUserStatistics';
 
-export default function StatisticsSection({ userId }) {
+export default function StatisticsSection({ userId, refreshKey = 0 }) {
   const cardStyle = {
     flex: 1,
     backgroundColor: colors.card,
@@ -18,19 +18,11 @@ export default function StatisticsSection({ userId }) {
     alignItems: 'center',
   };
 
-  const { stats, reload } = useUserStatisticsData(userId);
+  const { stats, reload } = useUserStatistics(userId);
 
   React.useEffect(() => {
-    reload();
-  }, [reload]);
-
-  React.useEffect(() => {
-    console.log('[StatisticsSection] input', userId);
-  }, [userId]);
-
-  React.useEffect(() => {
-    console.log('[StatisticsSection] stats', stats);
-  }, [stats]);
+    void reload();
+  }, [reload, refreshKey]);
 
   return (
     <View>
