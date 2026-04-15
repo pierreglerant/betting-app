@@ -1,10 +1,11 @@
+import logo from '@/assets/images/logo.png';
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
 import { supabase } from '@/libs/supabase';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, Text, TextInput, View } from 'react-native';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -43,8 +44,18 @@ export default function Login() {
 
   return (
     <View
-      style={{ flex: 1, justifyContent: 'center', padding: 20, backgroundColor: colors.background }}
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        paddingBottom: 80,
+        backgroundColor: colors.background,
+      }}
     >
+      <Image
+        source={logo}
+        style={{ width: 120, height: 120, alignSelf: 'center', marginBottom: -10 }}
+      />
       <Text
         style={{
           fontSize: 28,
