@@ -21,8 +21,7 @@ export default function Login() {
     setErrorMessage('');
 
     try {
-      const { data, error } = await supabase
-        .rpc('get_user', { p_username: username });
+      const { data, error } = await supabase.rpc('get_user', { p_username: username });
 
       if (error || !data) {
         setErrorMessage('Pseudo introuvable');
