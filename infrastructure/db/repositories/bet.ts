@@ -1,4 +1,5 @@
-import { getBetById, getBets, getBetCommentsByBetId, getBetOptionsByBetId } from '../dao/bet';
+import { Bet } from '@/domain/entities/Bet';
+import { getBetById, getBets, getBetCommentsByBetId, getBetOptionsByBetId, createBet} from '../dao/bet';
 
 import { mapBet } from '../mappers/bet';
 import { mapComment } from '../mappers/comment';
@@ -27,5 +28,10 @@ export const betRepository = {
       comments: comments.map(mapComment),
       options: options.map(mapOption),
     };
+  },
+
+  async createBet(bet: Bet, optionValues: string[]) {
+    const data = await createBet(bet, optionValues);
+    return data;
   },
 };

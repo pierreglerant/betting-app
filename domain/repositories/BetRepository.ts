@@ -11,4 +11,5 @@ export interface BetRepository {
       options: Option[];
     }
   >;
+  createBet(bet: Bet, optionValues: string[]): Promise<string>;
 }

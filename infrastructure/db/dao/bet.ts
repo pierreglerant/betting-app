@@ -1,4 +1,5 @@
 import { supabase } from '@/infrastructure/db/api/supabase';
+import { Bet } from '@/domain/entities/Bet';
 
 export async function getBetById(id: string) {
   const { data, error } = await supabase.rpc('get_bet', { id: id });
@@ -42,4 +43,23 @@ export async function getBetOptionsByBetId(betId: string) {
   }
 
   return data || [];
+}
+
+export async function createBet(bet: Bet, optionValues: string[]) {
+  const { data, error } = await supabase.rpc('create_bet', {
+    p_title: bet.title,
+    p_context: bet.context,
+    p_end_date: bet.endDate?.toISOString(),
+    p_option_values: optionValues,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    throw new Error('Failed to create bet');
+  }
+
+  return data;
 }
