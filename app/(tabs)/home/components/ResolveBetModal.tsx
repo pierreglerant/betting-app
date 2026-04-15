@@ -1,8 +1,8 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import type { Option } from '@/domain/entities/Option';
-import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
 import { supabase } from '@/libs/supabase';
+import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
 import React from 'react';
 import { ActivityIndicator, Button, Pressable, ScrollView, Text, View } from 'react-native';
 import { Bet } from '../types';
