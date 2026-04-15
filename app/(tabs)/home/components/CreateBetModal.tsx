@@ -148,6 +148,7 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
       result: null,
       resultImageUrl: null,
       createdAt: new Date(),
+      creatorId: null,
     };
 
     try {

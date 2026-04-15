@@ -8,5 +8,6 @@ export function mapBet(dto: any) {
     result: dto.result,
     resultImageUrl: dto.result_image_url,
     createdAt: new Date(dto.created_at),
+    creatorId: dto.creator_id ?? null,
   };
 }

@@ -3,7 +3,13 @@ import { Bet } from '@/domain/entities/Bet';
 import { getBetsUseCase } from '@/domain/usecases/getBets';
 import { betRepository } from '@/infrastructure/db/repositories/bet';
 
-export function useBets() {
+type UseBetsOptions = {
+  /** défaut true ; false pour laisser un parent (ex. useBetsBundle) déclencher le premier chargement */
+  autoLoad?: boolean;
+};
+
+export function useBets(options: UseBetsOptions = {}) {
+  const { autoLoad = true } = options;
   const [bets, setBets] = useState<Bet[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +28,10 @@ export function useBets() {
   }, []);
 
   useEffect(() => {
-    fetchBets();
-  }, [fetchBets]);
+    if (autoLoad) {
+      void fetchBets();
+    }
+  }, [autoLoad, fetchBets]);
 
   return {
     bets,

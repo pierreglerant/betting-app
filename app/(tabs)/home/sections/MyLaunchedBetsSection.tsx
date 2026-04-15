@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { SECTION_PREVIEW_LIMIT } from '@/constants/bets';
-import { useMyLaunchedBetsData } from '../hooks/useBetQueries';
 import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
 import BetStatusBadge from '../components/BetStatusBadge';
@@ -9,22 +8,12 @@ import ResolveBetModal from '../components/ResolveBetModal';
 import { Bet } from '../types';
 
 type MyLaunchedBetsSectionProps = {
-  userId: string;
-  refreshKey: number;
+  bets: Bet[];
   onDataChanged: () => void;
 };
 
-export default function MyLaunchedBetsSection({
-  userId,
-  refreshKey,
-  onDataChanged,
-}: MyLaunchedBetsSectionProps) {
+export default function MyLaunchedBetsSection({ bets, onDataChanged }: MyLaunchedBetsSectionProps) {
   const router = useRouter();
-  const { bets, reload } = useMyLaunchedBetsData(userId);
-
-  React.useEffect(() => {
-    reload();
-  }, [reload, refreshKey]);
 
   const [manageModalVisible, setManageModalVisible] = React.useState(false);
   const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);

@@ -8,13 +8,14 @@ import BetStatusBadge from './components/BetStatusBadge';
 import BetsAllScreenShell from './components/BetsAllScreenShell';
 import CreateBetModal from './components/CreateBetModal';
 import PredictBetModal from './components/PredictBetModal';
-import { useOpenBetsData } from './hooks/useBetQueries';
+import { useBetsBundle } from './hooks/useBetsBundle';
 import { Bet, BetUserStatus } from './types';
 
 export default function OpenBetsAllScreen() {
   const { user } = useAuth();
   const userId = user?.id;
-  const { openBets, excludedSet, predictedSet, reload } = useOpenBetsData(userId);
+  const [refreshKey, setRefreshKey] = React.useState(0);
+  const { openBets, excludedSet, predictedSet, reload } = useBetsBundle(userId, refreshKey);
 
   const [createModalVisible, setCreateModalVisible] = React.useState(false);
   const [predictionModalVisible, setPredictionModalVisible] = React.useState(false);
@@ -30,13 +31,13 @@ export default function OpenBetsAllScreen() {
 
   const handleCreated = () => {
     setCreateModalVisible(false);
-    reload();
+    setRefreshKey((k) => k + 1);
   };
 
   const handlePredicted = () => {
     setPredictionModalVisible(false);
     setCurrentBet(null);
-    reload();
+    setRefreshKey((k) => k + 1);
   };
 
   if (!userId) {

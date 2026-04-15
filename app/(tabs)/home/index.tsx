@@ -5,6 +5,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { useBetsBundle } from './hooks/useBetsBundle';
 import { useUserPointsNumber } from './hooks/useBetQueries';
 import FinishedBetsSection from './sections/FinishedBetsSection';
 import MyLaunchedBetsSection from './sections/MyLaunchedBetsSection';
@@ -16,6 +17,7 @@ export default function HomeScreen() {
   const [refreshKey, setRefreshKey] = React.useState(0);
   const { points } = useUserPointsNumber(user?.id);
   const router = useRouter();
+  const betsBundle = useBetsBundle(user?.id, refreshKey);
 
   const refreshAll = () => {
     setRefreshKey((prev) => prev + 1);
@@ -133,15 +135,17 @@ export default function HomeScreen() {
         }}
       >
         <StatisticsSection userId={user.id} />
-        <OpenBetsSection userId={user.id} refreshKey={refreshKey} onDataChanged={refreshAll} />
-
-        <MyLaunchedBetsSection
+        <OpenBetsSection
           userId={user.id}
-          refreshKey={refreshKey}
+          openBets={betsBundle.openBets}
+          excludedSet={betsBundle.excludedSet}
+          predictedSet={betsBundle.predictedSet}
           onDataChanged={refreshAll}
         />
 
-        <FinishedBetsSection refreshKey={refreshKey} />
+        <MyLaunchedBetsSection bets={betsBundle.myLaunchedBets} onDataChanged={refreshAll} />
+
+        <FinishedBetsSection bets={betsBundle.finishedBets} />
       </ScrollView>
     </View>
   );

@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, Text } from 'react-native';
 import { SECTION_PREVIEW_LIMIT } from '@/constants/bets';
-import { useOpenBetsData } from '../hooks/useBetQueries';
 import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
 import BetStatusBadge from '../components/BetStatusBadge';
@@ -14,21 +13,20 @@ import { Bet, BetUserStatus } from '../types';
 
 type OpenBetsSectionProps = {
   userId: string;
-  refreshKey: number;
+  openBets: Bet[];
+  excludedSet: Set<string>;
+  predictedSet: Set<string>;
   onDataChanged: () => void;
 };
 
 export default function OpenBetsSection({
   userId,
-  refreshKey,
+  openBets,
+  excludedSet,
+  predictedSet,
   onDataChanged,
 }: OpenBetsSectionProps) {
   const router = useRouter();
-  const { openBets, excludedSet, predictedSet, reload } = useOpenBetsData(userId);
-
-  React.useEffect(() => {
-    reload();
-  }, [reload, refreshKey]);
 
   const [createModalVisible, setCreateModalVisible] = React.useState(false);
   const [predictionModalVisible, setPredictionModalVisible] = React.useState(false);

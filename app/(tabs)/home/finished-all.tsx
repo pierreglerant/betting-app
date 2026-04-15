@@ -1,10 +1,12 @@
+import { useAuth } from '@/contexts/auth-context';
 import React from 'react';
 import BetRow from './components/BetRow';
 import BetsAllScreenShell from './components/BetsAllScreenShell';
-import { useFinishedBetsData } from './hooks/useBetQueries';
+import { useBetsBundle } from './hooks/useBetsBundle';
 
 export default function FinishedAllScreen() {
-  const { bets, reload } = useFinishedBetsData();
+  const { user } = useAuth();
+  const { finishedBets: bets, reload } = useBetsBundle(user?.id, 0);
 
   return (
     <BetsAllScreenShell
