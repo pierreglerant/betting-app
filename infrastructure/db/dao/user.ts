@@ -7,9 +7,15 @@ export async function getUserByUsername(username: string) {
     throw error;
   }
 
-  if (!data) {
+  if (data == null) {
     throw new Error('User not found');
   }
 
-  return data;
+  // RPC en SETOF renvoie souvent un tableau même pour une seule ligne.
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row || typeof row !== 'object') {
+    throw new Error('User not found');
+  }
+
+  return row;
 }

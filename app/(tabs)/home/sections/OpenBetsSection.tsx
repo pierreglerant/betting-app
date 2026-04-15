@@ -24,7 +24,7 @@ export default function OpenBetsSection({
   onDataChanged,
 }: OpenBetsSectionProps) {
   const router = useRouter();
-  const { openBets, users, excludedSet, predictedSet, reload } = useOpenBetsData(userId);
+  const { openBets, excludedSet, predictedSet, reload } = useOpenBetsData(userId);
 
   React.useEffect(() => {
     reload();
@@ -100,8 +100,6 @@ export default function OpenBetsSection({
       <CreateBetModal
         visible={createModalVisible}
         onClose={() => setCreateModalVisible(false)}
-        creatorId={userId}
-        users={users}
         onCreated={handleCreated}
       />
 

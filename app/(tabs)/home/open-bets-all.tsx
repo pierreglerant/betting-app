@@ -14,7 +14,7 @@ import { Bet, BetUserStatus } from './types';
 export default function OpenBetsAllScreen() {
   const { user } = useAuth();
   const userId = user?.id;
-  const { openBets, users, excludedSet, predictedSet, reload } = useOpenBetsData(userId);
+  const { openBets, excludedSet, predictedSet, reload } = useOpenBetsData(userId);
 
   const [createModalVisible, setCreateModalVisible] = React.useState(false);
   const [predictionModalVisible, setPredictionModalVisible] = React.useState(false);
@@ -65,8 +65,6 @@ export default function OpenBetsAllScreen() {
           <CreateBetModal
             visible={createModalVisible}
             onClose={() => setCreateModalVisible(false)}
-            creatorId={userId}
-            users={users}
             onCreated={handleCreated}
           />
           <PredictBetModal

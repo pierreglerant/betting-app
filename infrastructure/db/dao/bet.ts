@@ -45,12 +45,14 @@ export async function getBetOptionsByBetId(betId: string) {
   return data || [];
 }
 
-export async function createBet(bet: Bet, optionValues: string[]) {
+export async function createBet(bet: Bet, optionValues: string[], creatorId: string) {
+  // Ne pas omettre p_end_date : sinon PostgREST ne résout pas la surcharge à 5 arguments (PGRST202 / 404).
   const { data, error } = await supabase.rpc('create_bet', {
     p_title: bet.title,
     p_context: bet.context,
-    p_end_date: bet.endDate?.toISOString(),
+    p_end_date: bet.endDate != null ? bet.endDate.toISOString() : null,
     p_option_values: optionValues,
+    p_creator_id: creatorId,
   });
 
   if (error) {

@@ -1,6 +1,6 @@
 import { colors } from '@/constants/theme';
 import React from 'react';
-import { DimensionValue, Modal, Pressable } from 'react-native';
+import { DimensionValue, Modal, Pressable, StyleSheet, View } from 'react-native';
 
 type BaseModalProps = {
   visible: boolean;
@@ -12,30 +12,40 @@ type BaseModalProps = {
 export default function BaseModal({ visible, onClose, children, width = '90%' }: BaseModalProps) {
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <Pressable
+      <View
         style={{
           flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.5)',
           justifyContent: 'center',
           alignItems: 'center',
           padding: 20,
         }}
-        onPress={onClose}
       >
         <Pressable
-          onPress={() => {}}
+          accessibilityRole="button"
+          style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.5)' }]}
+          onPress={onClose}
+        />
+        <View
+          pointerEvents="box-none"
           style={{
             width,
-            backgroundColor: colors.card,
-            borderColor: colors.border,
-            borderWidth: 1,
-            padding: 20,
-            borderRadius: 12,
+            maxWidth: '100%',
+            zIndex: 1,
           }}
         >
-          {children}
-        </Pressable>
-      </Pressable>
+          <View
+            style={{
+              backgroundColor: colors.card,
+              borderColor: colors.border,
+              borderWidth: 1,
+              padding: 20,
+              borderRadius: 12,
+            }}
+          >
+            {children}
+          </View>
+        </View>
+      </View>
     </Modal>
   );
 }

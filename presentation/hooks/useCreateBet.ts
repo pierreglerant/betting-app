@@ -7,12 +7,12 @@ export function useCreateBet() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const create = async (bet: Bet, options: string[]) => {
+  const create = async (bet: Bet, options: string[], creatorId: string) => {
     try {
       setLoading(true);
       setError(null);
 
-      const id = await createBetUseCase(betRepository, bet, options);
+      const id = await createBetUseCase(betRepository, bet, options, creatorId);
 
       return id;
     } catch (err) {
