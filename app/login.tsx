@@ -22,10 +22,7 @@ export default function Login() {
 
     try {
       const { data, error } = await supabase
-        .from('user')
-        .select('*')
-        .eq('username', username)
-        .single();
+        .rpc('get_user', { p_username: username });
 
       if (error || !data) {
         setErrorMessage('Pseudo introuvable');
