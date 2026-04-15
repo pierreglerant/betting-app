@@ -22,7 +22,7 @@ export default function Login() {
 
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('user')
         .select('*')
         .eq('username', username)
         .single();
