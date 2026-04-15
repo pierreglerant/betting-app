@@ -12,4 +12,6 @@ export interface BetRepository {
     }
   >;
   createBet(bet: Bet, optionValues: string[], creatorId: string): Promise<string>;
+  getBetOptionsForBet(betId: string): Promise<Option[]>;
+  placeBet(userId: string, betId: string, optionId: number, points: number): Promise<string>;
 }

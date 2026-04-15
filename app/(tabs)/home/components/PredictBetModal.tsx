@@ -1,6 +1,8 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
-import { supabase } from '@/libs/supabase';
+import type { Option } from '@/domain/entities/Option';
+import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
+import { usePlaceBet } from '@/presentation/hooks/usePlaceBet';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -12,7 +14,6 @@ import {
   View,
 } from 'react-native';
 import { Bet } from '../types';
-import { fetchBetOptions, type BetOptionRow } from '../utils/fetchBetOptions';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
 
@@ -31,41 +32,27 @@ export default function PredictBetModal({
   onClose,
   onPredicted,
 }: PredictBetModalProps) {
-  const [options, setOptions] = React.useState<BetOptionRow[]>([]);
-  const [optionsLoading, setOptionsLoading] = React.useState(false);
-  const [optionsError, setOptionsError] = React.useState<string | null>(null);
-  const [selectedOption, setSelectedOption] = React.useState<BetOptionRow | null>(null);
+  const {
+    options,
+    loading: optionsLoading,
+    error: optionsError,
+    load,
+    reset,
+  } = useBetOptionsLoad();
+  const { place, loading: placeLoading, error: placeError } = usePlaceBet();
+  const [selectedOption, setSelectedOption] = React.useState<Option | null>(null);
   const [amount, setAmount] = React.useState('');
 
   React.useEffect(() => {
     if (!visible || !bet?.id) {
-      setOptions([]);
-      setOptionsError(null);
+      reset();
       setSelectedOption(null);
       setAmount('');
       return;
     }
 
-    let cancelled = false;
-    setOptionsLoading(true);
-    setOptionsError(null);
-
-    void (async () => {
-      const { options: next, error } = await fetchBetOptions(supabase, bet.id);
-      if (cancelled) return;
-      setOptionsLoading(false);
-      if (error) {
-        setOptionsError(error);
-        setOptions([]);
-        return;
-      }
-      setOptions(next);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [visible, bet?.id]);
+    void load(bet.id);
+  }, [visible, bet?.id, load, reset]);
 
   const handlePredict = async () => {
     if (!bet || !selectedOption || !amount.trim()) return;
@@ -73,15 +60,12 @@ export default function PredictBetModal({
     const parsedAmount = parseInt(amount, 10);
     if (Number.isNaN(parsedAmount) || parsedAmount <= 0) return;
 
-    const { error } = await supabase.rpc('place_bet', {
-      p_user_id: userId,
-      p_bet_id: bet.id,
-      p_option_id: selectedOption.id,
-      p_points: parsedAmount,
-    });
+    const optionId = Number(selectedOption.id);
+    if (!Number.isFinite(optionId)) return;
 
-    if (error) {
-      console.error('Error place_bet:', error);
+    try {
+      await place(userId, bet.id, optionId, parsedAmount);
+    } catch {
       return;
     }
 
@@ -90,6 +74,7 @@ export default function PredictBetModal({
   };
 
   const selectedLabel = selectedOption?.value ?? '—';
+  const busy = optionsLoading || placeLoading;
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
@@ -136,6 +121,12 @@ export default function PredictBetModal({
         Choix : {selectedLabel}
       </Text>
 
+      {placeError ? (
+        <Text style={{ color: colors.danger, fontFamily: fonts.medium, marginTop: 8 }}>
+          {placeError}
+        </Text>
+      ) : null}
+
       <TextInput
         placeholder="Points"
         value={amount}
@@ -155,7 +146,7 @@ export default function PredictBetModal({
       />
 
       <View style={{ marginTop: 15 }}>
-        <Button title="Valider" onPress={handlePredict} color={colors.primary} />
+        <Button title="Valider" onPress={handlePredict} color={colors.primary} disabled={busy} />
       </View>
     </BaseModal>
   );

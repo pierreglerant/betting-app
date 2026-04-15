@@ -1,10 +1,11 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
+import type { Option } from '@/domain/entities/Option';
+import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
 import { supabase } from '@/libs/supabase';
 import React from 'react';
 import { ActivityIndicator, Button, Pressable, ScrollView, Text, View } from 'react-native';
 import { Bet } from '../types';
-import { fetchBetOptions, type BetOptionRow } from '../utils/fetchBetOptions';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
 
@@ -21,39 +22,24 @@ export default function ResolveBetModal({
   onClose,
   onChanged,
 }: ResolveBetModalProps) {
-  const [options, setOptions] = React.useState<BetOptionRow[]>([]);
-  const [optionsLoading, setOptionsLoading] = React.useState(false);
-  const [optionsError, setOptionsError] = React.useState<string | null>(null);
+  const {
+    options,
+    loading: optionsLoading,
+    error: optionsError,
+    load,
+    reset,
+  } = useBetOptionsLoad();
 
   React.useEffect(() => {
     if (!visible || !bet?.id) {
-      setOptions([]);
-      setOptionsError(null);
+      reset();
       return;
     }
 
-    let cancelled = false;
-    setOptionsLoading(true);
-    setOptionsError(null);
+    void load(bet.id);
+  }, [visible, bet?.id, load, reset]);
 
-    void (async () => {
-      const { options: next, error } = await fetchBetOptions(supabase, bet.id);
-      if (cancelled) return;
-      setOptionsLoading(false);
-      if (error) {
-        setOptionsError(error);
-        setOptions([]);
-        return;
-      }
-      setOptions(next);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [visible, bet?.id]);
-
-  const resolveBet = async (winning: BetOptionRow) => {
+  const resolveBet = async (winning: Option) => {
     if (!bet) return;
 
     const { error } = await supabase

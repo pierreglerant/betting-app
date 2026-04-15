@@ -1,5 +1,5 @@
-import { supabase } from '@/infrastructure/db/api/supabase';
 import { Bet } from '@/domain/entities/Bet';
+import { supabase } from '@/infrastructure/db/api/supabase';
 
 export async function getBetById(id: string) {
   const { data, error } = await supabase.rpc('get_bet', { id: id });
@@ -43,6 +43,25 @@ export async function getBetOptionsByBetId(betId: string) {
   }
 
   return data || [];
+}
+
+export async function placeBet(userId: string, betId: string, optionId: number, points: number) {
+  const { data, error } = await supabase.rpc('place_bet', {
+    p_user_id: userId,
+    p_bet_id: betId,
+    p_option_id: optionId,
+    p_points: points,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (data == null) {
+    throw new Error('place_bet failed');
+  }
+
+  return data as string;
 }
 
 export async function createBet(bet: Bet, optionValues: string[], creatorId: string) {

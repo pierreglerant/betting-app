@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { supabase } from '@/infrastructure/db/api/supabase';
 
 export type BetOptionRow = {
   id: number;
@@ -36,16 +36,12 @@ function normalizeRows(data: unknown): BetOptionRow[] {
   return out;
 }
 
-/**
- * Options d'un pari : RPC puis, si vide ou erreur, lecture table `option`
- * (RLS / format SETOF composite peuvent faire renvoyer [] sans erreur).
- */
-export async function fetchBetOptions(
-  client: SupabaseClient,
-  betId: string,
-): Promise<{ options: BetOptionRow[]; error: string | null }> {
-  // Uniquement `bet_id` : pas de surcharge `p_bet_id` côté DB → évite PGRST202 / schema cache.
-  const { data, error: rpcError } = await client.rpc('get_bet_options', { bet_id: betId });
+/** RPC puis lecture table `option` si vide (RLS / format RPC). */
+export async function getBetOptionsWithFallback(betId: string): Promise<{
+  options: BetOptionRow[];
+  error: string | null;
+}> {
+  const { data, error: rpcError } = await supabase.rpc('get_bet_options', { bet_id: betId });
   let lastMessage: string | null = rpcError?.message ?? null;
 
   if (!rpcError) {
@@ -55,7 +51,7 @@ export async function fetchBetOptions(
     }
   }
 
-  const { data: tableRows, error: tableErr } = await client
+  const { data: tableRows, error: tableErr } = await supabase
     .from('option')
     .select('id, value')
     .eq('bet_id', betId)
@@ -74,7 +70,7 @@ export async function fetchBetOptions(
   }
 
   const hint =
-    '0 ligne renvoyée : vérifie en base des lignes dans public.option pour ce pari, exécute supabase/sql/fix_option_access.sql (get_bet_options en security definer + policy SELECT sur option).';
+    '0 ligne renvoyée : vérifie public.option pour ce pari et les politiques RLS (voir supabase/sql/fix_option_access.sql).';
 
   return {
     options: [],
