@@ -17,4 +17,4 @@ export type UserLite = {
 
 export type PredictionChoice = 'yes' | 'no';
 
-export type BetUserStatus = 'excluded' | 'pending' | 'done' | 'late';
+export type BetUserStatus = 'pending' | 'done' | 'late';

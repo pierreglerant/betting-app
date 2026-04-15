@@ -143,7 +143,6 @@ export default function HomeScreen() {
         <OpenBetsSection
           userId={user.id}
           openBets={betsBundle.openBets}
-          excludedSet={betsBundle.excludedSet}
           predictedSet={betsBundle.predictedSet}
           onDataChanged={refreshAll}
         />

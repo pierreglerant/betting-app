@@ -1,10 +1,10 @@
 import { Bet } from '@/domain/entities/Bet';
 import {
+  createBet,
   getBetById,
-  getBets,
   getBetCommentsByBetId,
   getBetOptionsByBetId,
-  createBet,
+  getBets,
   placeBet as placeBetDao,
 } from '../dao/bet';
 import { getBetOptionsWithFallback } from '../dao/betOptions';

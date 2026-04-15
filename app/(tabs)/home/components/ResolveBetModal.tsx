@@ -79,13 +79,6 @@ export default function ResolveBetModal({
       return;
     }
 
-    const { error: tagsError } = await supabase.from('bet_tags').delete().eq('bet_id', bet.id);
-
-    if (tagsError) {
-      console.error('Error deleting bet tags:', tagsError);
-      return;
-    }
-
     const { error: betError } = await supabase.from('bet').delete().eq('id', bet.id);
 
     if (betError) {

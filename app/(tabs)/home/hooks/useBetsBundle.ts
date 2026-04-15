@@ -5,29 +5,24 @@ import { partitionDomainBets } from '../utils/partitionBets';
 
 export function useBetsBundle(userId: string | undefined, refreshKey: number) {
   const { bets: domainBets, loading, error, reload: reloadBets } = useBets({ autoLoad: false });
-  const [excludedSet, setExcludedSet] = useState<Set<string>>(new Set());
   const [predictedSet, setPredictedSet] = useState<Set<string>>(new Set());
 
   const fetchMeta = useCallback(async () => {
     if (!userId) {
-      setExcludedSet(new Set());
       setPredictedSet(new Set());
       return;
     }
 
-    const [excludedRes, predictedRes] = await Promise.all([
-      supabase.from('bet_tags').select('bet_id').eq('user_id', userId),
-      supabase.from('user_bet').select('bet_id').eq('user_id', userId).eq('is_creator', false),
-    ]);
+    const predictedRes = await supabase
+      .from('user_bet')
+      .select('bet_id')
+      .eq('user_id', userId)
+      .eq('is_creator', false);
 
-    if (excludedRes.error) {
-      console.error('Error fetching excluded bets:', excludedRes.error);
-    }
     if (predictedRes.error) {
       console.error('Error fetching user_bet wagers:', predictedRes.error);
     }
 
-    setExcludedSet(new Set((excludedRes.data || []).map((e) => e.bet_id)));
     setPredictedSet(new Set((predictedRes.data || []).map((p) => p.bet_id)));
   }, [userId]);
 
@@ -49,7 +44,6 @@ export function useBetsBundle(userId: string | undefined, refreshKey: number) {
     openBets,
     myLaunchedBets,
     finishedBets,
-    excludedSet,
     predictedSet,
     reload,
     loading,

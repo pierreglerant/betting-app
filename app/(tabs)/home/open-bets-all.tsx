@@ -15,7 +15,7 @@ export default function OpenBetsAllScreen() {
   const { user } = useAuth();
   const userId = user?.id;
   const [refreshKey, setRefreshKey] = React.useState(0);
-  const { openBets, excludedSet, predictedSet, reload } = useBetsBundle(userId, refreshKey);
+  const { openBets, predictedSet, reload } = useBetsBundle(userId, refreshKey);
 
   const [createModalVisible, setCreateModalVisible] = React.useState(false);
   const [predictionModalVisible, setPredictionModalVisible] = React.useState(false);
@@ -23,7 +23,6 @@ export default function OpenBetsAllScreen() {
 
   const getStatus = (bet: Bet): BetUserStatus => {
     if (!userId) return 'pending';
-    if (excludedSet.has(bet.id)) return 'excluded';
     if (predictedSet.has(bet.id)) return 'done';
     if (bet.deadline && new Date(bet.deadline) < new Date()) return 'late';
     return 'pending';

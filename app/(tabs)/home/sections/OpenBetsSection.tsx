@@ -14,7 +14,6 @@ import { Bet, BetUserStatus } from '../types';
 type OpenBetsSectionProps = {
   userId: string;
   openBets: Bet[];
-  excludedSet: Set<string>;
   predictedSet: Set<string>;
   onDataChanged: () => void;
 };
@@ -22,7 +21,6 @@ type OpenBetsSectionProps = {
 export default function OpenBetsSection({
   userId,
   openBets,
-  excludedSet,
   predictedSet,
   onDataChanged,
 }: OpenBetsSectionProps) {
@@ -33,7 +31,6 @@ export default function OpenBetsSection({
   const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);
 
   const getStatus = (bet: Bet): BetUserStatus => {
-    if (excludedSet.has(bet.id)) return 'excluded';
     if (predictedSet.has(bet.id)) return 'done';
     if (bet.deadline && new Date(bet.deadline) < new Date()) return 'late';
     return 'pending';

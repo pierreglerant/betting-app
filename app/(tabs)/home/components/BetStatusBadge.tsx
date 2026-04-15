@@ -11,13 +11,6 @@ const ICON_SIZE = 17;
 
 export default function BetStatusBadge({ status }: BetStatusBadgeProps) {
   const map = {
-    excluded: {
-      bg: 'rgba(156, 163, 175, 0.14)',
-      border: 'rgba(156, 163, 175, 0.35)',
-      text: '#d1d5db',
-      icon: 'account-off-outline' as const,
-      a11yLabel: 'Exclu',
-    },
     pending: {
       bg: 'rgba(250, 204, 21, 0.12)',
       border: 'rgba(250, 204, 21, 0.38)',
