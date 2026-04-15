@@ -1,6 +1,8 @@
 import type { UserStatistics } from '@/domain/entities/UserStatistics';
 
-export function mapUserStatisticsDto(row: Record<string, unknown> | null | undefined): UserStatistics {
+export function mapUserStatisticsDto(
+  row: Record<string, unknown> | null | undefined,
+): UserStatistics {
   if (row == null || typeof row !== 'object') {
     return { totalBets: 0, winRate: 0, ranking: 0 };
   }
