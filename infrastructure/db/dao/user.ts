@@ -54,3 +54,13 @@ export async function getUserByUsername(username: string) {
 
   return row;
 }
+
+export async function getRanking() {
+  const { data, error } = await supabase.rpc('get_ranking');
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
