@@ -4,13 +4,14 @@ import BetRow from './components/BetRow';
 import BetStatusBadge from './components/BetStatusBadge';
 import BetsAllScreenShell from './components/BetsAllScreenShell';
 import ResolveBetModal from './components/ResolveBetModal';
-import { useMyLaunchedBetsData } from './hooks/useBetQueries';
+import { useBetsBundle } from './hooks/useBetsBundle';
 import { Bet } from './types';
 
 export default function MyLaunchedAllScreen() {
   const { user } = useAuth();
   const userId = user?.id;
-  const { bets, reload } = useMyLaunchedBetsData(userId);
+  const [refreshKey, setRefreshKey] = React.useState(0);
+  const { myLaunchedBets: bets, reload } = useBetsBundle(userId, refreshKey);
 
   const [manageModalVisible, setManageModalVisible] = React.useState(false);
   const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);
@@ -18,7 +19,7 @@ export default function MyLaunchedAllScreen() {
   const handleChanged = () => {
     setManageModalVisible(false);
     setCurrentBet(null);
-    reload();
+    setRefreshKey((k) => k + 1);
   };
 
   if (!userId) {

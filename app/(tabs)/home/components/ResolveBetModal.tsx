@@ -1,8 +1,10 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
-import { supabase } from '@/libs/supabase';
+import type { Option } from '@/domain/entities/Option';
+import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
+import { useManageBet } from '@/presentation/hooks/useManageBet';
 import React from 'react';
-import { Button, Text, View } from 'react-native';
+import { ActivityIndicator, Button, Pressable, ScrollView, Text, View } from 'react-native';
 import { Bet } from '../types';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
@@ -20,63 +22,49 @@ export default function ResolveBetModal({
   onClose,
   onChanged,
 }: ResolveBetModalProps) {
-  const resolveBet = async (result: 'yes' | 'no') => {
-    if (!bet) return;
+  const {
+    options,
+    loading: optionsLoading,
+    error: optionsError,
+    load,
+    reset,
+  } = useBetOptionsLoad();
+  const { resolve, remove, loading: actionLoading, error: actionError } = useManageBet();
 
-    const { error } = await supabase
-      .from('bets')
-      .update({
-        status: 'resolved',
-        result,
-      })
-      .eq('id', bet.id);
-
-    if (error) {
-      console.error('Error resolving bet:', error);
+  React.useEffect(() => {
+    if (!visible || !bet?.id) {
+      reset();
       return;
     }
 
-    onClose();
-    onChanged();
+    void load(bet.id);
+  }, [visible, bet?.id, load, reset]);
+
+  const resolveBet = async (winning: Option) => {
+    if (!bet) return;
+
+    try {
+      await resolve(bet.id, winning.value);
+      onClose();
+      onChanged();
+    } catch (error) {
+      console.error('Error resolving bet:', error);
+    }
   };
 
   const deleteBet = async () => {
     if (!bet) return;
 
-    const { error: commentsError } = await supabase.from('comments').delete().eq('bet_id', bet.id);
-
-    if (commentsError) {
-      console.error('Error deleting comments:', commentsError);
-      return;
+    try {
+      await remove(bet.id);
+      onClose();
+      onChanged();
+    } catch (error) {
+      console.error('Error deleting bet:', error);
     }
-
-    const { error: predictionsError } = await supabase
-      .from('predictions')
-      .delete()
-      .eq('bet_id', bet.id);
-
-    if (predictionsError) {
-      console.error('Error deleting predictions:', predictionsError);
-      return;
-    }
-
-    const { error: tagsError } = await supabase.from('bet_tags').delete().eq('bet_id', bet.id);
-
-    if (tagsError) {
-      console.error('Error deleting bet tags:', tagsError);
-      return;
-    }
-
-    const { error: betError } = await supabase.from('bets').delete().eq('id', bet.id);
-
-    if (betError) {
-      console.error('Error deleting bet:', betError);
-      return;
-    }
-
-    onClose();
-    onChanged();
   };
+
+  const disabledActions = optionsLoading || actionLoading;
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
@@ -88,15 +76,54 @@ export default function ResolveBetModal({
         </Text>
       ) : null}
 
-      <View style={{ marginBottom: 10 }}>
-        <Button title="Résultat : Oui" onPress={() => resolveBet('yes')} color={colors.success} />
-      </View>
+      <Text style={{ marginBottom: 8, color: colors.text, fontFamily: fonts.semiBold }}>
+        Résultat gagnant
+      </Text>
 
-      <View style={{ marginBottom: 10 }}>
-        <Button title="Résultat : Non" onPress={() => resolveBet('no')} color={colors.primary} />
-      </View>
+      {optionsLoading ? (
+        <ActivityIndicator color={colors.primary} style={{ marginVertical: 12 }} />
+      ) : optionsError ? (
+        <Text style={{ color: colors.danger, fontFamily: fonts.medium, marginBottom: 8 }}>
+          {optionsError}
+        </Text>
+      ) : (
+        <ScrollView style={{ maxHeight: 260 }} keyboardShouldPersistTaps="handled">
+          {options.map((opt) => (
+            <Pressable
+              key={opt.id}
+              onPress={() => resolveBet(opt)}
+              disabled={disabledActions}
+              style={{
+                paddingVertical: 10,
+                paddingHorizontal: 12,
+                borderRadius: 8,
+                marginBottom: 8,
+                borderWidth: 1,
+                borderColor: colors.border,
+                backgroundColor: colors.cardSoft,
+                opacity: disabledActions ? 0.6 : 1,
+              }}
+            >
+              <Text style={{ color: colors.text, fontFamily: fonts.medium }}>{opt.value}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
 
-      <Button title="Supprimer le pari" onPress={deleteBet} color={colors.danger} />
+      {actionError ? (
+        <Text style={{ color: colors.danger, fontFamily: fonts.medium, marginTop: 10 }}>
+          {actionError}
+        </Text>
+      ) : null}
+
+      <View style={{ marginTop: 16 }}>
+        <Button
+          title={actionLoading ? 'Suppression...' : 'Supprimer le pari'}
+          onPress={deleteBet}
+          color={colors.danger}
+          disabled={disabledActions}
+        />
+      </View>
     </BaseModal>
   );
 }

@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, Text } from 'react-native';
 import { SECTION_PREVIEW_LIMIT } from '@/constants/bets';
-import { useOpenBetsData } from '../hooks/useBetQueries';
 import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
 import BetStatusBadge from '../components/BetStatusBadge';
@@ -14,28 +13,24 @@ import { Bet, BetUserStatus } from '../types';
 
 type OpenBetsSectionProps = {
   userId: string;
-  refreshKey: number;
+  openBets: Bet[];
+  predictedSet: Set<string>;
   onDataChanged: () => void;
 };
 
 export default function OpenBetsSection({
   userId,
-  refreshKey,
+  openBets,
+  predictedSet,
   onDataChanged,
 }: OpenBetsSectionProps) {
   const router = useRouter();
-  const { openBets, users, excludedSet, predictedSet, reload } = useOpenBetsData(userId);
-
-  React.useEffect(() => {
-    reload();
-  }, [reload, refreshKey]);
 
   const [createModalVisible, setCreateModalVisible] = React.useState(false);
   const [predictionModalVisible, setPredictionModalVisible] = React.useState(false);
   const [currentBet, setCurrentBet] = React.useState<Bet | null>(null);
 
   const getStatus = (bet: Bet): BetUserStatus => {
-    if (excludedSet.has(bet.id)) return 'excluded';
     if (predictedSet.has(bet.id)) return 'done';
     if (bet.deadline && new Date(bet.deadline) < new Date()) return 'late';
     return 'pending';
@@ -100,8 +95,6 @@ export default function OpenBetsSection({
       <CreateBetModal
         visible={createModalVisible}
         onClose={() => setCreateModalVisible(false)}
-        creatorId={userId}
-        users={users}
         onCreated={handleCreated}
       />
 

@@ -65,6 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        if (!parsed.id || !parsed.username) {
+          console.log('[auth] stored user missing id or username, clearing');
+          await AsyncStorage.removeItem('user');
+          return;
+        }
+
         const safeUser: User = {
           id: parsed.id,
           username: parsed.username,

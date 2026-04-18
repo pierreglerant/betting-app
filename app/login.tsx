@@ -2,43 +2,36 @@ import logo from '@/assets/images/logo.png';
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
-import { supabase } from '@/libs/supabase';
+import { useLogin } from '@/presentation/hooks/useLogin';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, Pressable, Text, TextInput, View } from 'react-native';
 
 export default function Login() {
   const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
   const { login } = useAuth();
+  const { loginByUsername, loading } = useLogin();
 
   const handleLogin = async () => {
     if (!username) return;
 
-    setLoading(true);
     setErrorMessage('');
 
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('username', username)
-        .single();
+      const user = await loginByUsername(username);
 
-      if (error || !data) {
-        setErrorMessage('Pseudo introuvable');
-        return;
-      }
-
-      await login(data);
+      await login({
+        id: user.id,
+        username: user.username,
+        avatar_url: user.avatarUrl ?? undefined,
+      });
 
       router.replace('/home');
-    } catch {
-      setErrorMessage('Erreur de connexion');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      const isNotFound = err instanceof Error && err.message === 'User not found';
+      setErrorMessage(isNotFound ? 'Pseudo introuvable' : 'Erreur de connexion');
     }
   };
 

@@ -1,21 +1,16 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { SECTION_PREVIEW_LIMIT } from '@/constants/bets';
-import { useFinishedBetsData } from '../hooks/useBetQueries';
 import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
+import { Bet } from '../types';
 
 type FinishedBetsSectionProps = {
-  refreshKey: number;
+  bets: Bet[];
 };
 
-export default function FinishedBetsSection({ refreshKey }: FinishedBetsSectionProps) {
+export default function FinishedBetsSection({ bets }: FinishedBetsSectionProps) {
   const router = useRouter();
-  const { bets, reload } = useFinishedBetsData();
-
-  React.useEffect(() => {
-    reload();
-  }, [reload, refreshKey]);
 
   const preview = bets.slice(0, SECTION_PREVIEW_LIMIT);
   const showSeeAll = bets.length > SECTION_PREVIEW_LIMIT;

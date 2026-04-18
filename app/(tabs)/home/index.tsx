@@ -5,7 +5,8 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
-import { useUserPointsNumber } from './hooks/useBetQueries';
+import { useUserPoints } from '@/presentation/hooks/useUserPoints';
+import { useBetsBundle } from './hooks/useBetsBundle';
 import FinishedBetsSection from './sections/FinishedBetsSection';
 import MyLaunchedBetsSection from './sections/MyLaunchedBetsSection';
 import OpenBetsSection from './sections/OpenBetsSection';
@@ -14,11 +15,17 @@ import StatisticsSection from './sections/StatisticsSection';
 export default function HomeScreen() {
   const { user, isLoading } = useAuth();
   const [refreshKey, setRefreshKey] = React.useState(0);
-  const { points } = useUserPointsNumber(user?.id);
+  const { points, reload: reloadPoints } = useUserPoints(user?.id);
   const router = useRouter();
+  const betsBundle = useBetsBundle(user?.id, refreshKey);
+
+  React.useEffect(() => {
+    void reloadPoints();
+  }, [reloadPoints]);
 
   const refreshAll = () => {
     setRefreshKey((prev) => prev + 1);
+    void reloadPoints();
   };
 
   if (isLoading) {
@@ -132,16 +139,17 @@ export default function HomeScreen() {
           padding: 20,
         }}
       >
-        <StatisticsSection userId={user.id} />
-        <OpenBetsSection userId={user.id} refreshKey={refreshKey} onDataChanged={refreshAll} />
-
-        <MyLaunchedBetsSection
+        <StatisticsSection userId={user.id} refreshKey={refreshKey} />
+        <OpenBetsSection
           userId={user.id}
-          refreshKey={refreshKey}
+          openBets={betsBundle.openBets}
+          predictedSet={betsBundle.predictedSet}
           onDataChanged={refreshAll}
         />
 
-        <FinishedBetsSection refreshKey={refreshKey} />
+        <MyLaunchedBetsSection bets={betsBundle.myLaunchedBets} onDataChanged={refreshAll} />
+
+        <FinishedBetsSection bets={betsBundle.finishedBets} />
       </ScrollView>
     </View>
   );

@@ -8,13 +8,14 @@ import BetStatusBadge from './components/BetStatusBadge';
 import BetsAllScreenShell from './components/BetsAllScreenShell';
 import CreateBetModal from './components/CreateBetModal';
 import PredictBetModal from './components/PredictBetModal';
-import { useOpenBetsData } from './hooks/useBetQueries';
+import { useBetsBundle } from './hooks/useBetsBundle';
 import { Bet, BetUserStatus } from './types';
 
 export default function OpenBetsAllScreen() {
   const { user } = useAuth();
   const userId = user?.id;
-  const { openBets, users, excludedSet, predictedSet, reload } = useOpenBetsData(userId);
+  const [refreshKey, setRefreshKey] = React.useState(0);
+  const { openBets, predictedSet, reload } = useBetsBundle(userId, refreshKey);
 
   const [createModalVisible, setCreateModalVisible] = React.useState(false);
   const [predictionModalVisible, setPredictionModalVisible] = React.useState(false);
@@ -22,7 +23,6 @@ export default function OpenBetsAllScreen() {
 
   const getStatus = (bet: Bet): BetUserStatus => {
     if (!userId) return 'pending';
-    if (excludedSet.has(bet.id)) return 'excluded';
     if (predictedSet.has(bet.id)) return 'done';
     if (bet.deadline && new Date(bet.deadline) < new Date()) return 'late';
     return 'pending';
@@ -30,13 +30,13 @@ export default function OpenBetsAllScreen() {
 
   const handleCreated = () => {
     setCreateModalVisible(false);
-    reload();
+    setRefreshKey((k) => k + 1);
   };
 
   const handlePredicted = () => {
     setPredictionModalVisible(false);
     setCurrentBet(null);
-    reload();
+    setRefreshKey((k) => k + 1);
   };
 
   if (!userId) {
@@ -65,8 +65,6 @@ export default function OpenBetsAllScreen() {
           <CreateBetModal
             visible={createModalVisible}
             onClose={() => setCreateModalVisible(false)}
-            creatorId={userId}
-            users={users}
             onCreated={handleCreated}
           />
           <PredictBetModal
