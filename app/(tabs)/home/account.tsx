@@ -1,9 +1,8 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
-import { supabase } from '@/libs/supabase';
+import { useUpdateProfile } from '@/presentation/hooks/useUpdateProfile';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { decode } from 'base64-arraybuffer';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -13,6 +12,7 @@ export default function AccountScreen() {
   const { user, logout, setUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState(user?.username || '');
+  const { updateProfile, loading: profileLoading } = useUpdateProfile();
   const router = useRouter();
 
   const performLogout = async () => {
@@ -46,14 +46,21 @@ export default function AccountScreen() {
     const trimmed = username.trim();
     if (!trimmed) return;
 
-    const { error } = await supabase.from('users').update({ username: trimmed }).eq('id', user.id);
+    try {
+      const result = await updateProfile({
+        userId: user.id,
+        username: trimmed,
+      });
 
-    if (error) {
+      await setUser({
+        ...user,
+        username: result.username ?? trimmed,
+      });
+    } catch (error) {
       console.error('[username update error]', error);
+      Alert.alert('Erreur', 'Impossible de mettre à jour le nom.');
       return;
     }
-
-    await setUser({ ...user, username: trimmed });
   };
 
   const pickAndUploadImage = async () => {
@@ -83,45 +90,23 @@ export default function AccountScreen() {
     }
 
     const mimeType = image.mimeType || 'image/jpeg';
-    const extension = mimeType === 'image/png' ? 'png' : mimeType === 'image/webp' ? 'webp' : 'jpg';
-
-    const filePath = `${user.id}.${extension}`;
 
     try {
-      const fileBuffer = decode(image.base64);
+      const result = await updateProfile({
+        userId: user.id,
+        avatarBase64: image.base64,
+        avatarMimeType: mimeType,
+      });
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, fileBuffer, {
-          upsert: true,
-          contentType: mimeType,
+      if (result.avatarUrl) {
+        await setUser({
+          ...user,
+          avatar_url: result.avatarUrl,
         });
-
-      if (uploadError) {
-        console.error('[avatar upload error]', uploadError);
-        Alert.alert('Erreur upload');
-        return;
       }
-
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-
-      const avatarUrl = data.publicUrl;
-
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ avatar_url: avatarUrl })
-        .eq('id', user.id);
-
-      if (updateError) {
-        console.error('[avatar db error]', updateError);
-        Alert.alert('Erreur DB');
-        return;
-      }
-
-      await setUser({ ...user, avatar_url: avatarUrl });
     } catch (e) {
       console.error('[avatar crash]', e);
-      Alert.alert('Erreur upload');
+      Alert.alert('Erreur', 'Impossible de mettre à jour l’avatar.');
     }
   };
 
@@ -227,11 +212,12 @@ export default function AccountScreen() {
                   borderRadius: 10,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  opacity: pressed ? 0.8 : 1,
+                  opacity: profileLoading ? 0.5 : pressed ? 0.8 : 1,
                 })}
+                disabled={profileLoading}
               >
                 <Text style={{ color: colors.text, fontFamily: fonts.semiBold, fontSize: 14 }}>
-                  Enregistrer
+                  {profileLoading ? 'Enregistrement...' : 'Enregistrer'}
                 </Text>
               </Pressable>
             </View>

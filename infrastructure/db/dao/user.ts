@@ -26,7 +26,7 @@ export async function getUserStatistics(userId: string) {
 }
 
 export async function getUserPoints(userId: string) {
-  const { data, error } = await supabase.from('users').select('points').eq('id', userId).single();
+  const { data, error } = await supabase.from('user').select('points').eq('id', userId).single();
 
   if (error) {
     throw error;
