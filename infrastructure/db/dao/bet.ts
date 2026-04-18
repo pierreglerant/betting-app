@@ -102,11 +102,60 @@ export async function resolveBet(betId: string, winningValue: string) {
 export async function deleteBetById(betId: string) {
   const { data: userBets, error: userBetsError } = await supabase
     .from('user_bet')
-    .select('id')
+    .select('id, user_id, points, is_creator')
     .eq('bet_id', betId);
 
   if (userBetsError) {
     throw userBetsError;
+  }
+
+  // Remboursement: recrédite chaque utilisateur à hauteur des points misés sur ce pari.
+  const refundsByUserId = new Map<string, number>();
+  for (const row of userBets ?? []) {
+    if (row.is_creator) {
+      continue;
+    }
+
+    const userId = typeof row.user_id === 'string' ? row.user_id : '';
+    const stakedPoints = Number(row.points ?? 0);
+    if (!userId || !Number.isFinite(stakedPoints) || stakedPoints <= 0) {
+      continue;
+    }
+
+    refundsByUserId.set(userId, (refundsByUserId.get(userId) ?? 0) + stakedPoints);
+  }
+
+  if (refundsByUserId.size > 0) {
+    const userIds = [...refundsByUserId.keys()];
+
+    const { data: users, error: usersError } = await supabase
+      .from('user')
+      .select('id, points')
+      .in('id', userIds);
+
+    if (usersError) {
+      throw usersError;
+    }
+
+    const usersById = new Map<string, number>();
+    for (const user of users ?? []) {
+      usersById.set(String(user.id), Number(user.points ?? 0));
+    }
+
+    await Promise.all(
+      userIds.map(async (userId) => {
+        const currentPoints = usersById.get(userId) ?? 0;
+        const refund = refundsByUserId.get(userId) ?? 0;
+        const { error: updateError } = await supabase
+          .from('user')
+          .update({ points: currentPoints + refund })
+          .eq('id', userId);
+
+        if (updateError) {
+          throw updateError;
+        }
+      }),
+    );
   }
 
   const userBetIds = (userBets ?? []).map((row) => row.id).filter(Boolean);

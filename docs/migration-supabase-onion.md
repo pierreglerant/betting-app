@@ -61,6 +61,7 @@ Résumé du **reste à faire** pour ne plus utiliser le client `@/libs/supabase`
 ## Vérifications & Statut Final
 
 **Migration terminée** ✅
+
 - [x] Zéro import de `@/libs/supabase` dans `app/` et `presentation/`
 - [x] Client unique : `infrastructure/db/api/supabase.ts`
 - [x] Toutes les 3 sections refactorisées (useBetsBundle, ResolveBetModal, account)
