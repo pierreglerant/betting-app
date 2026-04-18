@@ -1,14 +1,14 @@
 import { Bet } from '@/domain/entities/Bet';
 import type { BetRepository } from '@/domain/repositories/BetRepository';
 import {
-    createBet,
-    deleteBetById,
-    getBetById,
-    getBetCommentsByBetId,
-    getBetOptionsByBetId,
-    getBets,
-    placeBet as placeBetDao,
-    resolveBet as resolveBetDao,
+  createBet,
+  deleteBetById,
+  getBetById,
+  getBetCommentsByBetId,
+  getBetOptionsByBetId,
+  getBets,
+  placeBet as placeBetDao,
+  resolveBet as resolveBetDao,
 } from '../dao/bet';
 import { getBetOptionsWithFallback } from '../dao/betOptions';
 

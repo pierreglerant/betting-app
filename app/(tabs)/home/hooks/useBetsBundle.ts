@@ -1,35 +1,18 @@
 import { useBets } from '@/presentation/hooks/useBets';
-import { supabase } from '@/libs/supabase';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useUserPredictedBets } from '@/presentation/hooks/useUserPredictedBets';
+import { useCallback, useEffect, useMemo } from 'react';
 import { partitionDomainBets } from '../utils/partitionBets';
 
 export function useBetsBundle(userId: string | undefined, refreshKey: number) {
   const { bets: domainBets, loading, error, reload: reloadBets } = useBets({ autoLoad: false });
-  const [predictedSet, setPredictedSet] = useState<Set<string>>(new Set());
+  const { predictedBetIds, loadPredictedBets } = useUserPredictedBets(userId);
 
-  const fetchMeta = useCallback(async () => {
-    if (!userId) {
-      setPredictedSet(new Set());
-      return;
-    }
-
-    const predictedRes = await supabase
-      .from('user_bet')
-      .select('bet_id')
-      .eq('user_id', userId)
-      .eq('is_creator', false);
-
-    if (predictedRes.error) {
-      console.error('Error fetching user_bet wagers:', predictedRes.error);
-    }
-
-    setPredictedSet(new Set((predictedRes.data || []).map((p) => p.bet_id)));
-  }, [userId]);
+  const predictedSet = useMemo(() => new Set(predictedBetIds), [predictedBetIds]);
 
   const reload = useCallback(async () => {
     await reloadBets();
-    await fetchMeta();
-  }, [reloadBets, fetchMeta]);
+    await loadPredictedBets();
+  }, [reloadBets, loadPredictedBets]);
 
   useEffect(() => {
     void reload();
