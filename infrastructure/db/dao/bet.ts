@@ -86,13 +86,10 @@ export async function createBet(bet: Bet, optionValues: string[], creatorId: str
 }
 
 export async function resolveBet(betId: string, winningValue: string) {
-  const { error } = await supabase
-    .from('bet')
-    .update({
-      result: winningValue,
-      is_open: false,
-    })
-    .eq('id', betId);
+  const { error } = await supabase.rpc('resolve_bet', {
+    p_bet_id: betId,
+    p_winning_value: winningValue,
+  });
 
   if (error) {
     throw error;
