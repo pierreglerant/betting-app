@@ -4,6 +4,7 @@ import type { UserStatistics } from '../entities/UserStatistics';
 export interface UserRepository {
   getUserByUsername(username: string): Promise<User>;
   getAllUsers(): Promise<User[]>;
+  getRanking(): Promise<User[]>;
   getUserStatistics(userId: string): Promise<UserStatistics>;
   getUserPoints(userId: string): Promise<number>;
 }

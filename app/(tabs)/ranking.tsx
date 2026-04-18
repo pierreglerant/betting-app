@@ -1,24 +1,48 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 
-const fakeRanking = [
-  { id: 1, name: 'John Doe', points: 100 },
-  { id: 2, name: 'Jane Smith', points: 95 },
-  { id: 3, name: 'Bob Johnson', points: 90 },
-  { id: 4, name: 'Alice Williams', points: 85 },
-  { id: 5, name: 'Charlie Brown', points: 80 },
-  { id: 6, name: 'David Wilson', points: 75 },
-  { id: 7, name: 'Emily Davis', points: 70 },
-  { id: 8, name: 'Frank Miller', points: 65 },
-  { id: 9, name: 'Grace Lee', points: 60 },
-  { id: 10, name: 'Henry Taylor', points: 55 },
-];
+import { useRanking } from '@/presentation/hooks/useRanking';
 
 export default function RankingScreen() {
+  const { ranking, loading, error } = useRanking();
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.background,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.background,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 20,
+        }}
+      >
+        <Text style={{ color: colors.error, textAlign: 'center', fontFamily: fonts.semiBold }}>
+          Erreur : {error}
+        </Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
       <View
         style={{
           flexDirection: 'row',
@@ -51,8 +75,8 @@ export default function RankingScreen() {
         </Text>
       </View>
 
-      {fakeRanking.map((user, index) => {
-        const isLast = index === fakeRanking.length - 1;
+      {ranking.map((user, index) => {
+        const isLast = index === ranking.length - 1;
 
         let rankColor = 'rgba(209, 213, 219, 0.6)';
 
@@ -95,7 +119,9 @@ export default function RankingScreen() {
                 </Text>
               </View>
 
-              <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>{user.name}</Text>
+              <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>
+                {user.username}
+              </Text>
             </View>
 
             <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>
@@ -104,6 +130,6 @@ export default function RankingScreen() {
           </View>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
