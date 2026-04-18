@@ -84,3 +84,56 @@ export async function createBet(bet: Bet, optionValues: string[], creatorId: str
 
   return data;
 }
+
+export async function resolveBet(betId: string, winningValue: string) {
+  const { error } = await supabase
+    .from('bet')
+    .update({
+      result: winningValue,
+      is_open: false,
+    })
+    .eq('id', betId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function deleteBetById(betId: string) {
+  const { data: userBets, error: userBetsError } = await supabase
+    .from('user_bet')
+    .select('id')
+    .eq('bet_id', betId);
+
+  if (userBetsError) {
+    throw userBetsError;
+  }
+
+  const userBetIds = (userBets ?? []).map((row) => row.id).filter(Boolean);
+
+  if (userBetIds.length > 0) {
+    const { error: commentsError } = await supabase
+      .from('comment')
+      .delete()
+      .in('user_bet_id', userBetIds);
+
+    if (commentsError) {
+      throw commentsError;
+    }
+  }
+
+  const { error: userBetDeleteError } = await supabase
+    .from('user_bet')
+    .delete()
+    .eq('bet_id', betId);
+
+  if (userBetDeleteError) {
+    throw userBetDeleteError;
+  }
+
+  const { error: betError } = await supabase.from('bet').delete().eq('id', betId);
+
+  if (betError) {
+    throw betError;
+  }
+}

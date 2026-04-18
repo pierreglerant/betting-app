@@ -1,8 +1,8 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import type { Option } from '@/domain/entities/Option';
-import { supabase } from '@/libs/supabase';
 import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
+import { useManageBet } from '@/presentation/hooks/useManageBet';
 import React from 'react';
 import { ActivityIndicator, Button, Pressable, ScrollView, Text, View } from 'react-native';
 import { Bet } from '../types';
@@ -29,6 +29,7 @@ export default function ResolveBetModal({
     load,
     reset,
   } = useBetOptionsLoad();
+  const { resolve, remove, loading: actionLoading, error: actionError } = useManageBet();
 
   React.useEffect(() => {
     if (!visible || !bet?.id) {
@@ -42,53 +43,28 @@ export default function ResolveBetModal({
   const resolveBet = async (winning: Option) => {
     if (!bet) return;
 
-    const { error } = await supabase
-      .from('bet')
-      .update({
-        result: winning.value,
-        is_open: false,
-      })
-      .eq('id', bet.id);
-
-    if (error) {
+    try {
+      await resolve(bet.id, winning.value);
+      onClose();
+      onChanged();
+    } catch (error) {
       console.error('Error resolving bet:', error);
-      return;
     }
-
-    onClose();
-    onChanged();
   };
 
   const deleteBet = async () => {
     if (!bet) return;
 
-    const { error: commentsError } = await supabase.from('comments').delete().eq('bet_id', bet.id);
-
-    if (commentsError) {
-      console.error('Error deleting comments:', commentsError);
-      return;
+    try {
+      await remove(bet.id);
+      onClose();
+      onChanged();
+    } catch (error) {
+      console.error('Error deleting bet:', error);
     }
-
-    const { error: predictionsError } = await supabase
-      .from('predictions')
-      .delete()
-      .eq('bet_id', bet.id);
-
-    if (predictionsError) {
-      console.error('Error deleting predictions:', predictionsError);
-      return;
-    }
-
-    const { error: betError } = await supabase.from('bet').delete().eq('id', bet.id);
-
-    if (betError) {
-      console.error('Error deleting bet:', betError);
-      return;
-    }
-
-    onClose();
-    onChanged();
   };
+
+  const disabledActions = optionsLoading || actionLoading;
 
   return (
     <BaseModal visible={visible} onClose={onClose} width="80%">
@@ -116,6 +92,7 @@ export default function ResolveBetModal({
             <Pressable
               key={opt.id}
               onPress={() => resolveBet(opt)}
+              disabled={disabledActions}
               style={{
                 paddingVertical: 10,
                 paddingHorizontal: 12,
@@ -124,6 +101,7 @@ export default function ResolveBetModal({
                 borderWidth: 1,
                 borderColor: colors.border,
                 backgroundColor: colors.cardSoft,
+                opacity: disabledActions ? 0.6 : 1,
               }}
             >
               <Text style={{ color: colors.text, fontFamily: fonts.medium }}>{opt.value}</Text>
@@ -132,8 +110,19 @@ export default function ResolveBetModal({
         </ScrollView>
       )}
 
+      {actionError ? (
+        <Text style={{ color: colors.danger, fontFamily: fonts.medium, marginTop: 10 }}>
+          {actionError}
+        </Text>
+      ) : null}
+
       <View style={{ marginTop: 16 }}>
-        <Button title="Supprimer le pari" onPress={deleteBet} color={colors.danger} />
+        <Button
+          title={actionLoading ? 'Suppression...' : 'Supprimer le pari'}
+          onPress={deleteBet}
+          color={colors.danger}
+          disabled={disabledActions}
+        />
       </View>
     </BaseModal>
   );

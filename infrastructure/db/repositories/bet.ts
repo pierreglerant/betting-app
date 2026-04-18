@@ -1,11 +1,14 @@
 import { Bet } from '@/domain/entities/Bet';
+import type { BetRepository } from '@/domain/repositories/BetRepository';
 import {
-  createBet,
-  getBetById,
-  getBetCommentsByBetId,
-  getBetOptionsByBetId,
-  getBets,
-  placeBet as placeBetDao,
+    createBet,
+    deleteBetById,
+    getBetById,
+    getBetCommentsByBetId,
+    getBetOptionsByBetId,
+    getBets,
+    placeBet as placeBetDao,
+    resolveBet as resolveBetDao,
 } from '../dao/bet';
 import { getBetOptionsWithFallback } from '../dao/betOptions';
 
@@ -13,7 +16,7 @@ import { mapBet } from '../mappers/bet';
 import { mapComment } from '../mappers/comment';
 import { mapOption } from '../mappers/option';
 
-export const betRepository = {
+export const betRepository: BetRepository = {
   async getBets() {
     const data = await getBets();
     return data.map(mapBet);
@@ -57,5 +60,13 @@ export const betRepository = {
 
   async placeBet(userId: string, betId: string, optionId: number, points: number) {
     return placeBetDao(userId, betId, optionId, points);
+  },
+
+  async resolveBet(betId: string, winningValue: string) {
+    await resolveBetDao(betId, winningValue);
+  },
+
+  async deleteBet(betId: string) {
+    await deleteBetById(betId);
   },
 };
