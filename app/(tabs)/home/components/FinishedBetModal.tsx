@@ -2,10 +2,18 @@ import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { useBetParticipants } from '@/presentation/hooks/useBetParticipants';
 import React from 'react';
-import { ActivityIndicator, Button, ScrollView, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Button,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { Bet } from '../types';
-import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
 
 type FinishedBetModalProps = {
@@ -39,155 +47,200 @@ export default function FinishedBetModal({ visible, bet, onClose }: FinishedBetM
   );
 
   return (
-    <BaseModal visible={visible} onClose={onClose} width="84%">
-      <ModalTitle title="Détail du pari" />
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={styles.root}>
+        <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose} />
+        <View style={styles.sidePanel}>
+          <ModalTitle title="Détail du pari" />
 
-      {bet ? (
-        <>
-          <Text style={{ color: colors.text, fontFamily: fonts.semiBold, marginBottom: 6 }}>
-            {bet.title}
-          </Text>
-
-          {bet.context ? (
-            <Text style={{ color: colors.textMuted, fontFamily: fonts.regular, marginBottom: 12 }}>
-              {bet.context}
-            </Text>
-          ) : null}
-
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: colors.border,
-              backgroundColor: colors.cardSoft,
-              borderRadius: 10,
-              padding: 12,
-              marginBottom: 12,
-            }}
-          >
-            <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
-              Résultat: {bet.result ?? 'Résultat indisponible'}
-            </Text>
-            {bet.deadline ? (
-              <Text style={{ color: colors.textMuted, fontFamily: fonts.regular, marginTop: 6 }}>
-                Date de fin: {new Date(bet.deadline).toLocaleDateString()}
+          {bet ? (
+            <>
+              <Text style={{ color: colors.text, fontFamily: fonts.semiBold, marginBottom: 6 }}>
+                {bet.title}
               </Text>
-            ) : null}
-          </View>
 
-          <Text style={{ color: colors.text, fontFamily: fonts.semiBold, marginBottom: 8 }}>
-            Historique des mises
-          </Text>
-
-          {loading ? (
-            <ActivityIndicator color={colors.primary} style={{ marginVertical: 12 }} />
-          ) : error ? (
-            <Text style={{ color: colors.danger, fontFamily: fonts.medium, marginBottom: 12 }}>
-              {error}
-            </Text>
-          ) : (
-            <ScrollView style={{ maxHeight: 240 }} keyboardShouldPersistTaps="handled">
-              {winners.length > 0 ? (
+              {bet.context ? (
                 <Text
-                  style={{
-                    color: colors.success,
-                    fontFamily: fonts.semiBold,
-                    marginBottom: 8,
-                  }}
+                  style={{ color: colors.textMuted, fontFamily: fonts.regular, marginBottom: 12 }}
                 >
-                  Gagnants ({winners.length})
+                  {bet.context}
                 </Text>
               ) : null}
 
-              {winners.map((participant) => (
-                <View
-                  key={participant.id}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: colors.success,
-                    backgroundColor: colors.cardSoft,
-                    borderRadius: 10,
-                    paddingVertical: 10,
-                    paddingHorizontal: 12,
-                    marginBottom: 8,
-                  }}
-                >
-                  <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
-                    {participant.username}
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  backgroundColor: colors.cardSoft,
+                  borderRadius: 10,
+                  padding: 12,
+                  marginBottom: 12,
+                }}
+              >
+                <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
+                  Résultat: {bet.result ?? 'Résultat indisponible'}
+                </Text>
+                {bet.deadline ? (
+                  <Text
+                    style={{ color: colors.textMuted, fontFamily: fonts.regular, marginTop: 6 }}
+                  >
+                    Date de fin: {new Date(bet.deadline).toLocaleDateString()}
                   </Text>
-                  <Text style={{ color: colors.success, fontFamily: fonts.regular, marginTop: 4 }}>
-                    {formatParticipantLine(
-                      participant.optionValue,
-                      participant.points,
-                      participant.isCreator,
-                    )}
-                  </Text>
-                </View>
-              ))}
+                ) : null}
+              </View>
 
-              {losers.length > 0 ? (
+              <Text style={{ color: colors.text, fontFamily: fonts.semiBold, marginBottom: 8 }}>
+                Historique des mises
+              </Text>
+
+              {loading ? (
+                <ActivityIndicator color={colors.primary} style={{ marginVertical: 12 }} />
+              ) : error ? (
                 <Text
                   style={{
                     color: colors.danger,
-                    fontFamily: fonts.semiBold,
-                    marginTop: winners.length > 0 ? 8 : 0,
-                    marginBottom: 8,
+                    fontFamily: fonts.medium,
+                    marginBottom: 12,
                   }}
                 >
-                  Perdants ({losers.length})
+                  {error}
                 </Text>
               ) : null}
 
-              {losers.map((participant) => (
-                <View
-                  key={participant.id}
-                  style={{
-                    borderWidth: 1,
-                    borderColor: colors.danger,
-                    backgroundColor: colors.cardSoft,
-                    borderRadius: 10,
-                    paddingVertical: 10,
-                    paddingHorizontal: 12,
-                    marginBottom: 8,
-                  }}
-                >
-                  <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
-                    {participant.username}
-                  </Text>
-                  <Text
-                    style={{ color: colors.textMuted, fontFamily: fonts.regular, marginTop: 4 }}
-                  >
-                    {formatParticipantLine(
-                      participant.optionValue,
-                      participant.points,
-                      participant.isCreator,
-                    )}
-                  </Text>
-                </View>
-              ))}
+              {!loading && !error ? (
+                <ScrollView style={{ maxHeight: 300 }} keyboardShouldPersistTaps="handled">
+                  {winners.length > 0 ? (
+                    <Text
+                      style={{
+                        color: colors.success,
+                        fontFamily: fonts.semiBold,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Gagnants ({winners.length})
+                    </Text>
+                  ) : null}
 
-              {bettors.length === 0 ? (
-                <Text
-                  style={{ color: colors.textMuted, fontFamily: fonts.regular, marginBottom: 12 }}
-                >
-                  Aucun pari enregistré pour l’instant.
-                </Text>
+                  {winners.map((participant) => (
+                    <View
+                      key={participant.id}
+                      style={{
+                        borderWidth: 1,
+                        borderColor: colors.success,
+                        backgroundColor: colors.cardSoft,
+                        borderRadius: 10,
+                        paddingVertical: 10,
+                        paddingHorizontal: 12,
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
+                        {participant.username}
+                      </Text>
+                      <Text
+                        style={{ color: colors.success, fontFamily: fonts.regular, marginTop: 4 }}
+                      >
+                        {formatParticipantLine(
+                          participant.optionValue,
+                          participant.points,
+                          participant.isCreator,
+                        )}
+                      </Text>
+                    </View>
+                  ))}
+
+                  {losers.length > 0 ? (
+                    <Text
+                      style={{
+                        color: colors.danger,
+                        fontFamily: fonts.semiBold,
+                        marginTop: winners.length > 0 ? 8 : 0,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Perdants ({losers.length})
+                    </Text>
+                  ) : null}
+
+                  {losers.map((participant) => (
+                    <View
+                      key={participant.id}
+                      style={{
+                        borderWidth: 1,
+                        borderColor: colors.danger,
+                        backgroundColor: colors.cardSoft,
+                        borderRadius: 10,
+                        paddingVertical: 10,
+                        paddingHorizontal: 12,
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
+                        {participant.username}
+                      </Text>
+                      <Text
+                        style={{ color: colors.textMuted, fontFamily: fonts.regular, marginTop: 4 }}
+                      >
+                        {formatParticipantLine(
+                          participant.optionValue,
+                          participant.points,
+                          participant.isCreator,
+                        )}
+                      </Text>
+                    </View>
+                  ))}
+
+                  {bettors.length === 0 ? (
+                    <Text
+                      style={{
+                        color: colors.textMuted,
+                        fontFamily: fonts.regular,
+                        marginBottom: 12,
+                      }}
+                    >
+                      Aucun pari effectué
+                    </Text>
+                  ) : null}
+
+                  {bettors.length > 0 && normalizedResult.length === 0 ? (
+                    <Text
+                      style={{
+                        color: colors.textMuted,
+                        fontFamily: fonts.regular,
+                        marginBottom: 12,
+                      }}
+                    >
+                      Résultat non défini, impossible de distinguer gagnants et perdants.
+                    </Text>
+                  ) : null}
+                </ScrollView>
               ) : null}
 
-              {bettors.length > 0 && normalizedResult.length === 0 ? (
-                <Text
-                  style={{ color: colors.textMuted, fontFamily: fonts.regular, marginBottom: 12 }}
-                >
-                  Résultat non défini, impossible de distinguer gagnants et perdants.
-                </Text>
-              ) : null}
-            </ScrollView>
-          )}
-
-          <View style={{ marginTop: 16 }}>
-            <Button title="Fermer" onPress={onClose} color={colors.primary} />
-          </View>
-        </>
-      ) : null}
-    </BaseModal>
+              <View style={{ marginTop: 16 }}>
+                <Button title="Fermer" onPress={onClose} color={colors.primary} />
+              </View>
+            </>
+          ) : null}
+        </View>
+      </View>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    alignItems: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  sidePanel: {
+    width: '86%',
+    maxWidth: 460,
+    height: '100%',
+    backgroundColor: colors.card,
+    borderLeftWidth: 1,
+    borderLeftColor: colors.border,
+    padding: 20,
+    paddingTop: 28,
+  },
+});
