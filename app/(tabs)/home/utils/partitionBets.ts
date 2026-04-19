@@ -1,14 +1,6 @@
 import type { Bet as DomainBet } from '@/domain/entities/Bet';
 import type { Bet as AppBet } from '../types';
 
-function mapResultToApp(r: string | null): AppBet['result'] {
-  if (!r) return null;
-  const t = r.toLowerCase();
-  if (t === 'yes' || t === 'oui') return 'yes';
-  if (t === 'no' || t === 'non') return 'no';
-  return null;
-}
-
 export function domainBetToAppBet(b: DomainBet): AppBet {
   const status: AppBet['status'] = b.isOpen ? 'open' : b.result != null ? 'resolved' : 'closed';
 
@@ -19,7 +11,7 @@ export function domainBetToAppBet(b: DomainBet): AppBet {
     creator_id: b.creatorId ?? '',
     deadline: b.endDate ? b.endDate.toISOString() : null,
     status,
-    result: mapResultToApp(b.result),
+    result: b.result ?? null,
     result_image_url: b.resultImageUrl,
     created_at: b.createdAt.toISOString(),
   };

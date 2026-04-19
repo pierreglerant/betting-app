@@ -5,6 +5,7 @@ import {
   deleteBetById,
   getBetById,
   getBetCommentsByBetId,
+  getBetParticipantsByBetId,
   getBetOptionsByBetId,
   getBets,
   placeBet as placeBetDao,
@@ -39,6 +40,23 @@ export const betRepository: BetRepository = {
       comments: comments.map(mapComment),
       options: options.map(mapOption),
     };
+  },
+
+  async getBetParticipants(id: string) {
+    const rows = await getBetParticipantsByBetId(id);
+
+    return rows
+      .filter((row) => row && typeof row === 'object' && row.id)
+      .map((row: any) => ({
+        id: String(row.id),
+        userId: String(row.user_id ?? ''),
+        username: String(row.user?.username ?? 'Utilisateur inconnu'),
+        optionId: row.option_id == null ? null : Number(row.option_id),
+        optionValue: row.option?.value == null ? null : String(row.option.value),
+        points: Number(row.points ?? 0),
+        isCreator: Boolean(row.is_creator),
+        updatedAt: row.updated_at ? new Date(row.updated_at) : null,
+      }));
   },
 
   async createBet(bet: Bet, optionValues: string[], creatorId: string) {
