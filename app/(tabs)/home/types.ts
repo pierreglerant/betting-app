@@ -5,7 +5,7 @@ export type Bet = {
   creator_id: string;
   deadline?: string | null;
   status: 'open' | 'closed' | 'resolved';
-  result?: 'yes' | 'no' | null;
+  result?: string | null;
   result_image_url?: string | null;
   created_at: string;
 };

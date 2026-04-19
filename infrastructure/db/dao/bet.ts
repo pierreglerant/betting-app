@@ -45,6 +45,32 @@ export async function getBetOptionsByBetId(betId: string) {
   return data || [];
 }
 
+export async function getBetParticipantsByBetId(betId: string) {
+  const { data, error } = await supabase
+    .from('user_bet')
+    .select(
+      `
+        id,
+        user_id,
+        bet_id,
+        points,
+        updated_at,
+        is_creator,
+        option_id,
+        user:user_id ( id, username ),
+        option:option_id ( id, value )
+      `,
+    )
+    .eq('bet_id', betId)
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
 export async function placeBet(userId: string, betId: string, optionId: number, points: number) {
   const { data, error } = await supabase.rpc('place_bet', {
     p_user_id: userId,
