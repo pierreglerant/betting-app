@@ -1,5 +1,6 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
+import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
 import { useBetParticipants } from '@/presentation/hooks/useBetParticipants';
 import React from 'react';
 import {
@@ -32,6 +33,13 @@ function formatParticipantLine(optionValue: string | null, points: number, isCre
 }
 
 export default function FinishedBetModal({ visible, bet, onClose }: FinishedBetModalProps) {
+  const {
+    options,
+    loading: optionsLoading,
+    error: optionsError,
+    load: loadOptions,
+    reset: resetOptions,
+  } = useBetOptionsLoad();
   const { participants, loading, error } = useBetParticipants(visible ? bet?.id : undefined);
   const bettors = participants.filter((participant) => !participant.isCreator);
   const normalizedResult = (bet?.result ?? '').trim().toLowerCase();
@@ -45,6 +53,15 @@ export default function FinishedBetModal({ visible, bet, onClose }: FinishedBetM
   const losers = bettors.filter(
     (participant) => !winners.some((winner) => winner.id === participant.id),
   );
+
+  React.useEffect(() => {
+    if (!visible || !bet?.id) {
+      resetOptions();
+      return;
+    }
+
+    void loadOptions(bet.id);
+  }, [visible, bet?.id, loadOptions, resetOptions]);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -88,6 +105,58 @@ export default function FinishedBetModal({ visible, bet, onClose }: FinishedBetM
                   </Text>
                 ) : null}
               </View>
+
+              <Text style={{ color: colors.text, fontFamily: fonts.semiBold, marginBottom: 8 }}>
+                Options du pari
+              </Text>
+
+              {optionsLoading ? (
+                <ActivityIndicator color={colors.primary} style={{ marginVertical: 12 }} />
+              ) : optionsError ? (
+                <Text
+                  style={{
+                    color: colors.danger,
+                    fontFamily: fonts.medium,
+                    marginBottom: 12,
+                  }}
+                >
+                  {optionsError}
+                </Text>
+              ) : (
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    backgroundColor: colors.cardSoft,
+                    borderRadius: 10,
+                    padding: 12,
+                    marginBottom: 12,
+                  }}
+                >
+                  {options.map((option, index) => (
+                    <View
+                      key={option.id}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingVertical: 8,
+                        borderBottomWidth: index === options.length - 1 ? 0 : 1,
+                        borderBottomColor: colors.border,
+                      }}
+                    >
+                      <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
+                        {option.value}
+                      </Text>
+                    </View>
+                  ))}
+                  {options.length === 0 ? (
+                    <Text style={{ color: colors.textMuted, fontFamily: fonts.regular }}>
+                      Aucune option disponible
+                    </Text>
+                  ) : null}
+                </View>
+              )}
 
               <Text style={{ color: colors.text, fontFamily: fonts.semiBold, marginBottom: 8 }}>
                 Historique des mises
