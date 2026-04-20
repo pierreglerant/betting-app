@@ -5,8 +5,7 @@ import { Bet as DomainBet } from '@/domain/entities/Bet';
 import { useAllUsers } from '@/presentation/hooks/useAllUsers';
 import { useCreateBet } from '@/presentation/hooks/useCreateBet';
 import React from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-import BaseModal from './BaseModal';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import ModalTitle from './ModalTitle';
 
 /** Jour AAAA-MM-JJ + heure HH:mm optionnelle (si jour seul : fin de journée locale). */
@@ -162,254 +161,284 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
   };
 
   return (
-    <BaseModal visible={visible} onClose={handleClose}>
-      <ModalTitle title="Créer un pari" />
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+      <View style={styles.root}>
+        <Pressable style={StyleSheet.absoluteFillObject} onPress={handleClose} />
+        <View style={styles.sidePanel}>
+          <ModalTitle title="Créer un pari" />
 
-      <TextInput
-        placeholder="Titre"
-        value={newTitle}
-        onChangeText={setNewTitle}
-        style={{
-          borderWidth: 1,
-          borderColor: errors.title ? colors.danger : colors.border,
-          padding: 10,
-          marginBottom: 10,
-          borderRadius: 8,
-          backgroundColor: colors.cardSoft,
-          color: colors.text,
-          fontFamily: fonts.regular,
-        }}
-        placeholderTextColor={colors.textMuted}
-      />
+          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
+            <TextInput
+              placeholder="Titre"
+              value={newTitle}
+              onChangeText={setNewTitle}
+              style={{
+                borderWidth: 1,
+                borderColor: errors.title ? colors.danger : colors.border,
+                padding: 10,
+                marginBottom: 10,
+                borderRadius: 8,
+                backgroundColor: colors.cardSoft,
+                color: colors.text,
+                fontFamily: fonts.regular,
+              }}
+              placeholderTextColor={colors.textMuted}
+            />
 
-      <TextInput
-        placeholder="Contexte"
-        value={newContext}
-        onChangeText={setNewContext}
-        multiline
-        style={{
-          borderWidth: 1,
-          borderColor: errors.context ? colors.danger : colors.border,
-          padding: 10,
-          height: 80,
-          marginBottom: 10,
-          borderRadius: 8,
-          textAlignVertical: 'top',
-          backgroundColor: colors.cardSoft,
-          color: colors.text,
-          fontFamily: fonts.regular,
-        }}
-        placeholderTextColor={colors.textMuted}
-      />
+            <TextInput
+              placeholder="Contexte"
+              value={newContext}
+              onChangeText={setNewContext}
+              multiline
+              style={{
+                borderWidth: 1,
+                borderColor: errors.context ? colors.danger : colors.border,
+                padding: 10,
+                height: 80,
+                marginBottom: 10,
+                borderRadius: 8,
+                textAlignVertical: 'top',
+                backgroundColor: colors.cardSoft,
+                color: colors.text,
+                fontFamily: fonts.regular,
+              }}
+              placeholderTextColor={colors.textMuted}
+            />
 
-      <Pressable
-        onPress={() => {
-          setYesNoOptions((v) => {
-            const next = !v;
-            if (next) setSelectedOptionUserIds([]);
-            return next;
-          });
-          setSessionError(null);
-          setErrors((e) => ({ ...e, customOptions: false }));
-        }}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: 12,
-        }}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: yesNoOptions }}
-      >
-        <View
-          style={{
-            width: 22,
-            height: 22,
-            marginRight: 10,
-            borderWidth: 2,
-            borderColor: errors.customOptions ? colors.danger : colors.border,
-            borderRadius: 4,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: yesNoOptions ? colors.primary : 'transparent',
-          }}
-        >
-          {yesNoOptions ? (
-            <Text style={{ color: colors.text, fontSize: 13, fontFamily: fonts.semiBold }}>
-              {'\u2713'}
-            </Text>
-          ) : null}
-        </View>
-        <Text style={{ fontFamily: fonts.medium, color: colors.text, flex: 1 }}>
-          Choix Oui / Non
-        </Text>
-      </Pressable>
-
-      {!yesNoOptions ? (
-        <>
-          <Text
-            style={{
-              marginBottom: 6,
-              color: colors.textMuted,
-              fontFamily: fonts.medium,
-              fontSize: 13,
-            }}
-          >
-            Options du pari (pseudos) — au moins 2
-          </Text>
-          <ScrollView
-            style={{
-              maxHeight: 160,
-              marginBottom: 10,
-              borderWidth: 1,
-              borderColor: errors.customOptions ? colors.danger : colors.border,
-              borderRadius: 8,
-              backgroundColor: colors.cardSoft,
-            }}
-            nestedScrollEnabled
-          >
-            {usersLoading ? (
-              <Text
+            <Pressable
+              onPress={() => {
+                setYesNoOptions((v) => {
+                  const next = !v;
+                  if (next) setSelectedOptionUserIds([]);
+                  return next;
+                });
+                setSessionError(null);
+                setErrors((e) => ({ ...e, customOptions: false }));
+              }}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 12,
+              }}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: yesNoOptions }}
+            >
+              <View
                 style={{
-                  padding: 12,
-                  color: colors.textMuted,
-                  fontFamily: fonts.regular,
+                  width: 22,
+                  height: 22,
+                  marginRight: 10,
+                  borderWidth: 2,
+                  borderColor: errors.customOptions ? colors.danger : colors.border,
+                  borderRadius: 4,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: yesNoOptions ? colors.primary : 'transparent',
                 }}
               >
-                Chargement des utilisateurs…
+                {yesNoOptions ? (
+                  <Text style={{ color: colors.text, fontSize: 13, fontFamily: fonts.semiBold }}>
+                    {'\u2713'}
+                  </Text>
+                ) : null}
+              </View>
+              <Text style={{ fontFamily: fonts.medium, color: colors.text, flex: 1 }}>
+                Choix Oui / Non
               </Text>
-            ) : users.length === 0 ? (
-              <Text
-                style={{
-                  padding: 12,
-                  color: colors.textMuted,
-                  fontFamily: fonts.regular,
-                }}
-              >
-                Aucun utilisateur chargé.
-              </Text>
-            ) : (
-              users.map((u) => {
-                const selected = selectedOptionUserIds.includes(u.id);
-                return (
-                  <Pressable
-                    key={u.id}
-                    onPress={() => {
-                      setSelectedOptionUserIds((prev) =>
-                        prev.includes(u.id) ? prev.filter((x) => x !== u.id) : [...prev, u.id],
-                      );
-                      setErrors((e) => ({ ...e, customOptions: false }));
-                      setSessionError(null);
-                    }}
-                    style={{
-                      padding: 12,
-                      borderBottomWidth: 1,
-                      borderBottomColor: colors.border,
-                      backgroundColor: selected ? colors.primary : 'transparent',
-                    }}
-                  >
+            </Pressable>
+
+            {!yesNoOptions ? (
+              <>
+                <Text
+                  style={{
+                    marginBottom: 6,
+                    color: colors.textMuted,
+                    fontFamily: fonts.medium,
+                    fontSize: 13,
+                  }}
+                >
+                  Options du pari (pseudos) — au moins 2
+                </Text>
+                <ScrollView
+                  style={{
+                    maxHeight: 160,
+                    marginBottom: 10,
+                    borderWidth: 1,
+                    borderColor: errors.customOptions ? colors.danger : colors.border,
+                    borderRadius: 8,
+                    backgroundColor: colors.cardSoft,
+                  }}
+                  nestedScrollEnabled
+                >
+                  {usersLoading ? (
                     <Text
                       style={{
-                        color: selected ? colors.text : colors.textMuted,
-                        fontFamily: selected ? fonts.semiBold : fonts.regular,
+                        padding: 12,
+                        color: colors.textMuted,
+                        fontFamily: fonts.regular,
                       }}
                     >
-                      {u.username}
+                      Chargement des utilisateurs…
                     </Text>
-                  </Pressable>
-                );
-              })
-            )}
+                  ) : users.length === 0 ? (
+                    <Text
+                      style={{
+                        padding: 12,
+                        color: colors.textMuted,
+                        fontFamily: fonts.regular,
+                      }}
+                    >
+                      Aucun utilisateur chargé.
+                    </Text>
+                  ) : (
+                    users.map((u) => {
+                      const selected = selectedOptionUserIds.includes(u.id);
+                      return (
+                        <Pressable
+                          key={u.id}
+                          onPress={() => {
+                            setSelectedOptionUserIds((prev) =>
+                              prev.includes(u.id)
+                                ? prev.filter((x) => x !== u.id)
+                                : [...prev, u.id],
+                            );
+                            setErrors((e) => ({ ...e, customOptions: false }));
+                            setSessionError(null);
+                          }}
+                          style={{
+                            padding: 12,
+                            borderBottomWidth: 1,
+                            borderBottomColor: colors.border,
+                            backgroundColor: selected ? colors.primary : 'transparent',
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: selected ? colors.text : colors.textMuted,
+                              fontFamily: selected ? fonts.semiBold : fonts.regular,
+                            }}
+                          >
+                            {u.username}
+                          </Text>
+                        </Pressable>
+                      );
+                    })
+                  )}
+                </ScrollView>
+              </>
+            ) : null}
+
+            <Text
+              style={{
+                marginBottom: 4,
+                color: colors.textMuted,
+                fontFamily: fonts.medium,
+                fontSize: 13,
+              }}
+            >
+              Jour de fermeture (optionnel)
+            </Text>
+            <TextInput
+              placeholder="AAAA-MM-JJ"
+              value={closingDay}
+              onChangeText={setClosingDay}
+              autoCapitalize="none"
+              style={{
+                borderWidth: 1,
+                borderColor: errors.closingDate ? colors.danger : colors.border,
+                padding: 10,
+                marginBottom: 10,
+                borderRadius: 8,
+                backgroundColor: colors.cardSoft,
+                color: colors.text,
+                fontFamily: fonts.regular,
+              }}
+              placeholderTextColor={colors.textMuted}
+            />
+
+            <Text
+              style={{
+                marginBottom: 4,
+                color: colors.textMuted,
+                fontFamily: fonts.medium,
+                fontSize: 13,
+              }}
+            >
+              Heure de fermeture (optionnel)
+            </Text>
+            <TextInput
+              placeholder="HH:mm"
+              value={closingTime}
+              onChangeText={setClosingTime}
+              autoCapitalize="none"
+              style={{
+                borderWidth: 1,
+                borderColor: errors.closingDate ? colors.danger : colors.border,
+                padding: 10,
+                marginBottom: 10,
+                borderRadius: 8,
+                backgroundColor: colors.cardSoft,
+                color: colors.text,
+                fontFamily: fonts.regular,
+              }}
+              placeholderTextColor={colors.textMuted}
+            />
+
+            {sessionError || createError ? (
+              <Text
+                style={{
+                  color: colors.danger,
+                  marginTop: 10,
+                  fontFamily: fonts.medium,
+                }}
+              >
+                {sessionError ?? createError}
+              </Text>
+            ) : null}
+
+            <View style={{ marginTop: 15 }}>
+              <Pressable
+                onPress={() => {
+                  void handleCreateBet();
+                }}
+                disabled={loading}
+                style={({ pressed }) => ({
+                  backgroundColor: colors.primary,
+                  paddingVertical: 14,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  opacity: loading ? 0.5 : pressed ? 0.88 : 1,
+                })}
+              >
+                <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.semiBold }}>
+                  {loading ? 'Création…' : 'Créer'}
+                </Text>
+              </Pressable>
+            </View>
           </ScrollView>
-        </>
-      ) : null}
-
-      <Text
-        style={{
-          marginBottom: 4,
-          color: colors.textMuted,
-          fontFamily: fonts.medium,
-          fontSize: 13,
-        }}
-      >
-        Jour de fermeture (optionnel)
-      </Text>
-      <TextInput
-        placeholder="AAAA-MM-JJ"
-        value={closingDay}
-        onChangeText={setClosingDay}
-        autoCapitalize="none"
-        style={{
-          borderWidth: 1,
-          borderColor: errors.closingDate ? colors.danger : colors.border,
-          padding: 10,
-          marginBottom: 10,
-          borderRadius: 8,
-          backgroundColor: colors.cardSoft,
-          color: colors.text,
-          fontFamily: fonts.regular,
-        }}
-        placeholderTextColor={colors.textMuted}
-      />
-
-      <Text
-        style={{
-          marginBottom: 4,
-          color: colors.textMuted,
-          fontFamily: fonts.medium,
-          fontSize: 13,
-        }}
-      >
-        Heure de fermeture (optionnel)
-      </Text>
-      <TextInput
-        placeholder="HH:mm"
-        value={closingTime}
-        onChangeText={setClosingTime}
-        autoCapitalize="none"
-        style={{
-          borderWidth: 1,
-          borderColor: errors.closingDate ? colors.danger : colors.border,
-          padding: 10,
-          marginBottom: 10,
-          borderRadius: 8,
-          backgroundColor: colors.cardSoft,
-          color: colors.text,
-          fontFamily: fonts.regular,
-        }}
-        placeholderTextColor={colors.textMuted}
-      />
-
-      {sessionError || createError ? (
-        <Text
-          style={{
-            color: colors.danger,
-            marginTop: 10,
-            fontFamily: fonts.medium,
-          }}
-        >
-          {sessionError ?? createError}
-        </Text>
-      ) : null}
-
-      <View style={{ marginTop: 15 }}>
-        <Pressable
-          onPress={() => {
-            void handleCreateBet();
-          }}
-          disabled={loading}
-          style={({ pressed }) => ({
-            backgroundColor: colors.primary,
-            paddingVertical: 14,
-            borderRadius: 10,
-            alignItems: 'center',
-            opacity: loading ? 0.5 : pressed ? 0.88 : 1,
-          })}
-        >
-          <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.semiBold }}>
-            {loading ? 'Création…' : 'Créer'}
-          </Text>
-        </Pressable>
+        </View>
       </View>
-    </BaseModal>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    alignItems: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  sidePanel: {
+    width: '86%',
+    maxWidth: 460,
+    height: '100%',
+    backgroundColor: colors.card,
+    borderLeftWidth: 1,
+    borderLeftColor: colors.border,
+    padding: 20,
+    paddingTop: 28,
+  },
+  content: {
+    paddingBottom: 24,
+  },
+});
