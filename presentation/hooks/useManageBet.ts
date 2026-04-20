@@ -1,10 +1,12 @@
 import { useState } from 'react';
 
+import { useAuth } from '@/contexts/auth-context';
 import { deleteBetUseCase } from '@/domain/usecases/deleteBet';
 import { resolveBetUseCase } from '@/domain/usecases/resolveBet';
 import { betRepository } from '@/infrastructure/db/repositories/bet';
 
 export function useManageBet() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +28,10 @@ export function useManageBet() {
     try {
       setLoading(true);
       setError(null);
-      await deleteBetUseCase(betRepository, betId);
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+      await deleteBetUseCase(betRepository, betId, user.id);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error';
       setError(message);

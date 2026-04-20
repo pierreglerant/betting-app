@@ -84,7 +84,7 @@ export const betRepository: BetRepository = {
     await resolveBetDao(betId, winningValue);
   },
 
-  async deleteBet(betId: string) {
-    await deleteBetById(betId);
+  async deleteBet(betId: string, requesterId: string) {
+    await deleteBetById(betId, requesterId);
   },
 };

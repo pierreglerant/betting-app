@@ -1,7 +1,7 @@
 import { Bet } from '../entities/Bet';
+import { BetParticipant } from '../entities/BetParticipant';
 import { Comment } from '../entities/Comment';
 import { Option } from '../entities/Option';
-import { BetParticipant } from '../entities/BetParticipant';
 
 export interface BetRepository {
   getBets(): Promise<Bet[]>;
@@ -17,5 +17,5 @@ export interface BetRepository {
   getBetOptionsForBet(betId: string): Promise<Option[]>;
   placeBet(userId: string, betId: string, optionId: number, points: number): Promise<string>;
   resolveBet(betId: string, winningValue: string): Promise<void>;
-  deleteBet(betId: string): Promise<void>;
+  deleteBet(betId: string, requesterId: string): Promise<void>;
 }
