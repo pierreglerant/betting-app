@@ -23,6 +23,10 @@ type FinishedBetModalProps = {
   onClose: () => void;
 };
 
+function roundToInt(value: number) {
+  return Math.round(value);
+}
+
 function formatParticipantLine(optionValue: string | null, points: number, isCreator: boolean) {
   if (isCreator) {
     return 'Créateur du pari';
@@ -53,6 +57,17 @@ export default function FinishedBetModal({ visible, bet, onClose }: FinishedBetM
   const losers = bettors.filter(
     (participant) => !winners.some((winner) => winner.id === participant.id),
   );
+
+  const totalWinnersStake = winners.reduce((sum, participant) => sum + participant.points, 0);
+  const totalLosersStake = losers.reduce((sum, participant) => sum + participant.points, 0);
+
+  const computeWinnerNetGain = (stake: number) => {
+    if (totalWinnersStake <= 0 || totalLosersStake <= 0) {
+      return 0;
+    }
+
+    return roundToInt((totalLosersStake * stake) / totalWinnersStake);
+  };
 
   React.useEffect(() => {
     if (!visible || !bet?.id) {
@@ -190,33 +205,53 @@ export default function FinishedBetModal({ visible, bet, onClose }: FinishedBetM
                     </Text>
                   ) : null}
 
-                  {winners.map((participant) => (
-                    <View
-                      key={participant.id}
-                      style={{
-                        borderWidth: 1,
-                        borderColor: colors.success,
-                        backgroundColor: colors.cardSoft,
-                        borderRadius: 10,
-                        paddingVertical: 10,
-                        paddingHorizontal: 12,
-                        marginBottom: 8,
-                      }}
-                    >
-                      <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
-                        {participant.username}
-                      </Text>
-                      <Text
-                        style={{ color: colors.success, fontFamily: fonts.regular, marginTop: 4 }}
-                      >
-                        {formatParticipantLine(
-                          participant.optionValue,
-                          participant.points,
-                          participant.isCreator,
-                        )}
-                      </Text>
-                    </View>
-                  ))}
+                  {winners.map((participant) =>
+                    (() => {
+                      const netGain = computeWinnerNetGain(participant.points);
+                      const grossReceived = participant.points + netGain;
+
+                      return (
+                        <View
+                          key={participant.id}
+                          style={{
+                            borderWidth: 1,
+                            borderColor: colors.success,
+                            backgroundColor: colors.cardSoft,
+                            borderRadius: 10,
+                            paddingVertical: 10,
+                            paddingHorizontal: 12,
+                            marginBottom: 8,
+                          }}
+                        >
+                          <Text style={{ color: colors.text, fontFamily: fonts.medium }}>
+                            {participant.username}
+                          </Text>
+                          <Text
+                            style={{
+                              color: colors.success,
+                              fontFamily: fonts.regular,
+                              marginTop: 4,
+                            }}
+                          >
+                            {formatParticipantLine(
+                              participant.optionValue,
+                              participant.points,
+                              participant.isCreator,
+                            )}
+                          </Text>
+                          <Text
+                            style={{
+                              color: colors.success,
+                              fontFamily: fonts.semiBold,
+                              marginTop: 4,
+                            }}
+                          >
+                            Gain: +{netGain} pts · Total reçu: {grossReceived} pts
+                          </Text>
+                        </View>
+                      );
+                    })(),
+                  )}
 
                   {losers.length > 0 ? (
                     <Text
