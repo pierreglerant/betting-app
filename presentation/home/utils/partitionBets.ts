@@ -25,7 +25,9 @@ export function partitionDomainBets(
   myLaunchedBets: AppBet[];
   finishedBets: AppBet[];
 } {
-  const ui = domainBets.map(domainBetToAppBet);
+  const ui = domainBets
+    .map(domainBetToAppBet)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   const uid = userId ?? '';
   return {
     openBets: ui.filter((b) => b.status === 'open'),
