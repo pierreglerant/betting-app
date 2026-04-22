@@ -5,7 +5,7 @@ import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
 import BetStatusBadge from '../components/BetStatusBadge';
 import ResolveBetModal from '../components/ResolveBetModal';
-import { Bet } from '../types';
+import { Bet } from '@/presentation/home/types';
 
 type MyLaunchedBetsSectionProps = {
   bets: Bet[];

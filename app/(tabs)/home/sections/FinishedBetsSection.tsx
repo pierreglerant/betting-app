@@ -4,7 +4,7 @@ import { SECTION_PREVIEW_LIMIT } from '@/constants/bets';
 import BetRow from '../components/BetRow';
 import BetsSection from '../components/BetsSection';
 import FinishedBetModal from '../components/FinishedBetModal';
-import { Bet } from '../types';
+import { Bet } from '@/presentation/home/types';
 
 type FinishedBetsSectionProps = {
   bets: Bet[];

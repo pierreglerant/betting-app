@@ -13,7 +13,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { Bet } from '../types';
+import { Bet } from '@/presentation/home/types';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
 

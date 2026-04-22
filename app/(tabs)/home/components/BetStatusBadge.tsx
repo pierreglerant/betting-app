@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { Platform, View } from 'react-native';
-import { BetUserStatus } from '../types';
+import { BetUserStatus } from '@/presentation/home/types';
 
 type BetStatusBadgeProps = {
   status: BetUserStatus | 'manage' | 'resolved_yes' | 'resolved_no';

@@ -3,6 +3,7 @@ import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';
 import { useLogin } from '@/presentation/hooks/useLogin';
+import { useRegisterPushNotifications } from '@/presentation/hooks/useRegisterPushNotifications';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, Pressable, Text, TextInput, View } from 'react-native';
@@ -13,6 +14,7 @@ export default function Login() {
   const router = useRouter();
   const { login } = useAuth();
   const { loginByUsername, loading } = useLogin();
+  const { registerPushNotifications } = useRegisterPushNotifications();
 
   const handleLogin = async () => {
     if (!username) return;
@@ -27,6 +29,7 @@ export default function Login() {
         username: user.username,
         avatar_url: user.avatarUrl ?? undefined,
       });
+      await registerPushNotifications(user.id);
 
       router.replace('/home');
     } catch (err) {

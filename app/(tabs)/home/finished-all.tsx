@@ -3,8 +3,8 @@ import React from 'react';
 import BetRow from './components/BetRow';
 import BetsAllScreenShell from './components/BetsAllScreenShell';
 import FinishedBetModal from './components/FinishedBetModal';
-import { useBetsBundle } from './hooks/useBetsBundle';
-import { Bet } from './types';
+import { useBetsBundle } from '@/presentation/home/hooks/useBetsBundle';
+import { Bet } from '@/presentation/home/types';
 
 export default function FinishedAllScreen() {
   const { user } = useAuth();

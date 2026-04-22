@@ -8,8 +8,8 @@ import BetStatusBadge from './components/BetStatusBadge';
 import BetsAllScreenShell from './components/BetsAllScreenShell';
 import CreateBetModal from './components/CreateBetModal';
 import PredictBetModal from './components/PredictBetModal';
-import { useBetsBundle } from './hooks/useBetsBundle';
-import { Bet, BetUserStatus } from './types';
+import { useBetsBundle } from '@/presentation/home/hooks/useBetsBundle';
+import { Bet, BetUserStatus } from '@/presentation/home/types';
 
 export default function OpenBetsAllScreen() {
   const { user } = useAuth();

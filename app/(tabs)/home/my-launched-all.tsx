@@ -4,8 +4,8 @@ import BetRow from './components/BetRow';
 import BetStatusBadge from './components/BetStatusBadge';
 import BetsAllScreenShell from './components/BetsAllScreenShell';
 import ResolveBetModal from './components/ResolveBetModal';
-import { useBetsBundle } from './hooks/useBetsBundle';
-import { Bet } from './types';
+import { useBetsBundle } from '@/presentation/home/hooks/useBetsBundle';
+import { Bet } from '@/presentation/home/types';
 
 export default function MyLaunchedAllScreen() {
   const { user } = useAuth();

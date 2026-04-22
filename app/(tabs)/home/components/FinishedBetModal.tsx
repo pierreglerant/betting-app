@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 
-import { Bet } from '../types';
+import { Bet } from '@/presentation/home/types';
 import ModalTitle from './ModalTitle';
 
 type FinishedBetModalProps = {

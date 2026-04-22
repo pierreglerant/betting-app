@@ -9,7 +9,7 @@ import BetsSection from '../components/BetsSection';
 import BetStatusBadge from '../components/BetStatusBadge';
 import CreateBetModal from '../components/CreateBetModal';
 import PredictBetModal from '../components/PredictBetModal';
-import { Bet, BetUserStatus } from '../types';
+import { Bet, BetUserStatus } from '@/presentation/home/types';
 
 type OpenBetsSectionProps = {
   userId: string;

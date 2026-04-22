@@ -60,7 +60,9 @@ export const betRepository: BetRepository = {
   },
 
   async createBet(bet: Bet, optionValues: string[], creatorId: string) {
+    console.log('[createBet] repository:start', { creatorId, options: optionValues.length });
     const data = await createBet(bet, optionValues, creatorId);
+    console.log('[createBet] repository:done', { id: data });
     return data;
   },
 
@@ -81,7 +83,9 @@ export const betRepository: BetRepository = {
   },
 
   async resolveBet(betId: string, winningValue: string) {
+    console.log('[resolveBet] repository:start', { betId });
     await resolveBetDao(betId, winningValue);
+    console.log('[resolveBet] repository:done', { betId });
   },
 
   async deleteBet(betId: string, requesterId: string) {

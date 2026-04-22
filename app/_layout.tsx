@@ -1,5 +1,6 @@
 import { colors } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/contexts/auth-context';
+import { useRegisterPushNotifications } from '@/presentation/hooks/useRegisterPushNotifications';
 import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import {
   Manrope_400Regular,
@@ -11,12 +12,16 @@ import {
 } from '@expo-google-fonts/manrope';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
-SplashScreen.preventAutoHideAsync();
+void SplashScreen.preventAutoHideAsync().catch((error) => {
+  console.warn('[splash] preventAutoHideAsync failed', error);
+});
 
 function RootLayoutNav() {
-  const { isSignedIn, isLoading } = useAuth();
+  const { isSignedIn, isLoading, user } = useAuth();
+  const registeredNotificationsForUserRef = useRef<string | null>(null);
+  const { registerPushNotifications } = useRegisterPushNotifications();
   const router = useRouter();
   const segments = useSegments();
 
@@ -45,6 +50,22 @@ function RootLayoutNav() {
     }
   }, [isSignedIn, segments, isLoading, router]);
 
+  useEffect(() => {
+    if (isLoading || !isSignedIn || !user?.id) {
+      return;
+    }
+
+    if (registeredNotificationsForUserRef.current === user.id) {
+      return;
+    }
+
+    registeredNotificationsForUserRef.current = user.id;
+
+    void registerPushNotifications(user.id).then((result) => {
+      console.log('[notifications] registration result', result.status);
+    });
+  }, [isLoading, isSignedIn, registerPushNotifications, user?.id]);
+
   return (
     <Stack
       screenOptions={{
@@ -70,7 +91,9 @@ export default function RootLayout() {
       return;
     }
 
-    SplashScreen.hideAsync();
+    void SplashScreen.hideAsync().catch((error) => {
+      console.warn('[splash] hideAsync failed', error);
+    });
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
