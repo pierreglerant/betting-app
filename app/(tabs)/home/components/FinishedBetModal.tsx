@@ -5,7 +5,6 @@ import { useBetParticipants } from '@/presentation/hooks/useBetParticipants';
 import React from 'react';
 import {
   ActivityIndicator,
-  Button,
   Modal,
   Pressable,
   ScrollView,
@@ -321,7 +320,20 @@ export default function FinishedBetModal({ visible, bet, onClose }: FinishedBetM
               ) : null}
 
               <View style={{ marginTop: 16 }}>
-                <Button title="Fermer" onPress={onClose} color={colors.primary} />
+                <Pressable
+                  onPress={onClose}
+                  style={({ pressed }) => ({
+                    backgroundColor: colors.primary,
+                    paddingVertical: 12,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    opacity: pressed ? 0.88 : 1,
+                  })}
+                >
+                  <Text style={{ color: colors.text, fontSize: 14, fontFamily: fonts.semiBold }}>
+                    FERMER
+                  </Text>
+                </Pressable>
               </View>
             </>
           ) : null}

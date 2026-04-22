@@ -49,3 +49,6 @@ app-example
 !app.json
 !package.json
 !eas.json
+
+.codex
+cli-latest

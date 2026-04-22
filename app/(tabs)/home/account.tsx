@@ -136,7 +136,7 @@ export default function AccountScreen() {
             <FontAwesome5
               name="arrow-left"
               size={24}
-              color={colors.text}
+              color={colors.primary}
               style={{ marginRight: 12 }}
             />
           </Pressable>
@@ -180,7 +180,7 @@ export default function AccountScreen() {
                       alignItems: 'center',
                     }}
                   >
-                    <Text style={{ fontFamily: fonts.medium, fontSize: 40 }}>👤</Text>
+                    <FontAwesome5 name="user-alt" size={42} color={colors.textMuted} solid />
                   </View>
                 )}
               </Pressable>
