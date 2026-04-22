@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { useUserPoints } from '@/presentation/hooks/useUserPoints';
-import { useBetsBundle } from './hooks/useBetsBundle';
+import { useBetsBundle } from '@/presentation/home/hooks/useBetsBundle';
 import FinishedBetsSection from './sections/FinishedBetsSection';
 import MyLaunchedBetsSection from './sections/MyLaunchedBetsSection';
 import OpenBetsSection from './sections/OpenBetsSection';

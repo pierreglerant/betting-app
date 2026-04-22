@@ -5,7 +5,7 @@ import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
 import { useManageBet } from '@/presentation/hooks/useManageBet';
 import React from 'react';
 import { ActivityIndicator, Button, Pressable, ScrollView, Text, View } from 'react-native';
-import { Bet } from '../types';
+import { Bet } from '@/presentation/home/types';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
 
