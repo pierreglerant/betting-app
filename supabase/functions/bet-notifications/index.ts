@@ -22,6 +22,18 @@ type PushUser = {
   expo_push_token: string;
 };
 
+function formatUnknownError(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -100,12 +112,17 @@ async function getAllPushUsersExcept(excludedUserId: string): Promise<PushUser[]
   }));
 }
 
-async function getBetParticipantIdsExceptCreator(betId: string, creatorId: string): Promise<string[]> {
-  const { data, error } = await supabase
-    .from('user_bet')
-    .select('user_id')
-    .eq('bet_id', betId)
-    .neq('user_id', creatorId);
+async function getBetParticipantIdsExceptCreator(
+  betId: string,
+  creatorId: string,
+): Promise<string[]> {
+  let query = supabase.from('user_bet').select('user_id').eq('bet_id', betId);
+
+  if (creatorId) {
+    query = query.neq('user_id', creatorId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw error;
@@ -128,6 +145,35 @@ async function getUsername(userId: string): Promise<string> {
   return data?.username ? String(data.username) : 'Quelqu’un';
 }
 
+async function getBetCreatorId(betId: string): Promise<string> {
+  const { data: bet, error: betError } = await supabase
+    .from('bet')
+    .select('creator_id')
+    .eq('id', betId)
+    .maybeSingle();
+
+  if (betError) {
+    throw betError;
+  }
+
+  if (bet?.creator_id) {
+    return String(bet.creator_id);
+  }
+
+  const { data: creatorBet, error: creatorBetError } = await supabase
+    .from('user_bet')
+    .select('user_id')
+    .eq('bet_id', betId)
+    .eq('is_creator', true)
+    .maybeSingle();
+
+  if (creatorBetError) {
+    throw creatorBetError;
+  }
+
+  return creatorBet?.user_id ? String(creatorBet.user_id) : '';
+}
+
 async function handleCreateBet(payload: CreateBetPayload) {
   const { data: betId, error } = await supabase.rpc('create_bet', {
     p_title: payload.title,
@@ -145,28 +191,24 @@ async function handleCreateBet(payload: CreateBetPayload) {
     throw new Error('Failed to create bet');
   }
 
-  const [username, users] = await Promise.all([
-    getUsername(payload.creatorId),
-    getAllPushUsersExcept(payload.creatorId),
-  ]);
+  try {
+    const [username, users] = await Promise.all([
+      getUsername(payload.creatorId),
+      getAllPushUsersExcept(payload.creatorId),
+    ]);
 
-  await sendPushNotification(users, 'Nouveau pari 🍺', `${username} a lancé un pari`);
+    await sendPushNotification(users, 'Nouveau pari 🍺', `${username} a lancé un pari`);
+  } catch (error) {
+    console.error('[bet-notifications] createBet push failed', error);
+  }
 
   return { betId };
 }
 
 async function handleResolveBet(payload: ResolveBetPayload) {
-  const { data: bet, error: betError } = await supabase
-    .from('bet')
-    .select('creator_id')
-    .eq('id', payload.betId)
-    .maybeSingle();
-
-  if (betError) {
-    throw betError;
-  }
-
-  const creatorId = bet?.creator_id ? String(bet.creator_id) : '';
+  console.log('[bet-notifications] resolveBet:start', payload.betId);
+  const creatorId = await getBetCreatorId(payload.betId);
+  console.log('[bet-notifications] resolveBet:creator', creatorId);
 
   const { error } = await supabase.rpc('resolve_bet', {
     p_bet_id: payload.betId,
@@ -177,14 +219,23 @@ async function handleResolveBet(payload: ResolveBetPayload) {
     throw error;
   }
 
-  const participantIds = await getBetParticipantIdsExceptCreator(payload.betId, creatorId);
-  const users =
-    participantIds.length > 0
-      ? await getPushUsers(participantIds)
-      : await getAllPushUsersExcept(creatorId);
+  console.log('[bet-notifications] resolveBet:rpc done');
 
-  await sendPushNotification(users, 'Pari terminé ✅', 'Le résultat est disponible');
+  try {
+    const participantIds = await getBetParticipantIdsExceptCreator(payload.betId, creatorId);
+    const users =
+      participantIds.length > 0
+        ? await getPushUsers(participantIds)
+        : creatorId
+          ? await getAllPushUsersExcept(creatorId)
+          : [];
 
+    await sendPushNotification(users, 'Pari terminé ✅', 'Le résultat est disponible');
+  } catch (error) {
+    console.error('[bet-notifications] resolveBet push failed', error);
+  }
+
+  console.log('[bet-notifications] resolveBet:done');
   return { ok: true };
 }
 
@@ -206,7 +257,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error';
+    const message = formatUnknownError(error);
+    console.error('[bet-notifications] failed', message);
 
     return new Response(JSON.stringify({ error: message }), {
       status: 500,

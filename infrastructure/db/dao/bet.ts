@@ -1,6 +1,29 @@
 import { Bet } from '@/domain/entities/Bet';
 import { supabase } from '@/infrastructure/db/api/supabase';
 
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_KEY!;
+
+async function invokeBetNotifications<T>(body: Record<string, unknown>): Promise<T> {
+  const response = await fetch(`${supabaseUrl}/functions/v1/bet-notifications`, {
+    method: 'POST',
+    headers: {
+      apikey: supabaseKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  const responseBody = await response.text();
+  const data = responseBody ? JSON.parse(responseBody) : null;
+
+  if (!response.ok) {
+    throw new Error(data?.error ?? `bet-notifications failed with status ${response.status}`);
+  }
+
+  return data as T;
+}
+
 export async function getBetById(id: string) {
   const { data, error } = await supabase.rpc('get_bet', { id: id });
 
@@ -93,21 +116,14 @@ export async function placeBet(userId: string, betId: string, optionId: number, 
 export async function createBet(bet: Bet, optionValues: string[], creatorId: string) {
   console.log('[createBet] edge invoke:start', { creatorId, title: bet.title });
 
-  const { data, error } = await supabase.functions.invoke('bet-notifications', {
-    body: {
-      action: 'createBet',
-      title: bet.title,
-      context: bet.context,
-      endDate: bet.endDate != null ? bet.endDate.toISOString() : null,
-      optionValues,
-      creatorId,
-    },
+  const data = await invokeBetNotifications<{ betId: string }>({
+    action: 'createBet',
+    title: bet.title,
+    context: bet.context,
+    endDate: bet.endDate != null ? bet.endDate.toISOString() : null,
+    optionValues,
+    creatorId,
   });
-
-  if (error) {
-    console.error('[createBet] edge invoke:error', error);
-    throw error;
-  }
 
   console.log('[createBet] edge invoke:response', data);
 
@@ -121,18 +137,11 @@ export async function createBet(bet: Bet, optionValues: string[], creatorId: str
 export async function resolveBet(betId: string, winningValue: string) {
   console.log('[resolveBet] edge invoke:start', { betId });
 
-  const { error } = await supabase.functions.invoke('bet-notifications', {
-    body: {
-      action: 'resolveBet',
-      betId,
-      winningValue,
-    },
+  await invokeBetNotifications<{ ok: true }>({
+    action: 'resolveBet',
+    betId,
+    winningValue,
   });
-
-  if (error) {
-    console.error('[resolveBet] edge invoke:error', error);
-    throw error;
-  }
 
   console.log('[resolveBet] edge invoke:done', { betId });
 }
