@@ -1,9 +1,10 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useFocusEffect } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import React, { useCallback } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 type BetsAllScreenShellProps = {
   title: string;
@@ -24,6 +25,8 @@ export default function BetsAllScreenShell({
   children,
   footer,
 }: BetsAllScreenShellProps) {
+  const router = useRouter();
+
   useFocusEffect(
     useCallback(() => {
       reload();
@@ -34,14 +37,45 @@ export default function BetsAllScreenShell({
     <>
       <Stack.Screen
         options={{
-          headerShown: true,
-          title,
-          headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.primary,
-          headerTitleStyle: { color: colors.text, fontFamily: fonts.display },
+          headerShown: false,
         }}
       />
       <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 15,
+            paddingTop: 40,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+          }}
+        >
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.6 : 1,
+            })}
+          >
+            <FontAwesome5
+              name="arrow-left"
+              size={24}
+              color={colors.primary}
+              style={{ marginRight: 12 }}
+            />
+          </Pressable>
+
+          <Text
+            style={{
+              fontSize: 24,
+              color: colors.text,
+              fontFamily: fonts.display,
+            }}
+          >
+            {title}
+          </Text>
+        </View>
+
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 32 }}>
           {listHeader}
           {isEmpty ? (
