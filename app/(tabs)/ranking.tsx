@@ -42,7 +42,7 @@ export default function RankingScreen() {
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
       <View
         style={{
           flexDirection: 'row',
@@ -74,62 +74,63 @@ export default function RankingScreen() {
           Classement
         </Text>
       </View>
+      <ScrollView>
+        {ranking.map((user, index) => {
+          const isLast = index === ranking.length - 1;
 
-      {ranking.map((user, index) => {
-        const isLast = index === ranking.length - 1;
+          let rankColor = 'rgba(209, 213, 219, 0.6)';
 
-        let rankColor = 'rgba(209, 213, 219, 0.6)';
+          if (index === 0) rankColor = '#FFD700';
+          else if (index === 1) rankColor = '#C0C0C0';
+          else if (index === 2) rankColor = '#CD7F32';
 
-        if (index === 0) rankColor = '#FFD700';
-        else if (index === 1) rankColor = '#C0C0C0';
-        else if (index === 2) rankColor = '#CD7F32';
-
-        return (
-          <View
-            key={user.id}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingVertical: 15,
-              borderBottomWidth: isLast ? 0 : 1,
-              borderBottomColor: colors.border,
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 6,
-                  borderWidth: 2,
-                  borderColor: rankColor,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginRight: 12,
-                }}
-              >
-                <Text
+          return (
+            <View
+              key={user.id}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingVertical: 15,
+                borderBottomWidth: isLast ? 0 : 1,
+                borderBottomColor: colors.border,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
                   style={{
-                    color: rankColor,
-                    fontFamily: fonts.bold,
+                    width: 32,
+                    height: 32,
+                    borderRadius: 6,
+                    borderWidth: 2,
+                    borderColor: rankColor,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginRight: 12,
                   }}
                 >
-                  {index + 1}
+                  <Text
+                    style={{
+                      color: rankColor,
+                      fontFamily: fonts.bold,
+                    }}
+                  >
+                    {index + 1}
+                  </Text>
+                </View>
+
+                <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>
+                  {user.username}
                 </Text>
               </View>
 
-              <Text style={{ color: colors.text, fontFamily: fonts.semiBold }}>
-                {user.username}
+              <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>
+                {user.points} pts
               </Text>
             </View>
-
-            <Text style={{ color: colors.textMuted, fontFamily: fonts.medium }}>
-              {user.points} pts
-            </Text>
-          </View>
-        );
-      })}
-    </ScrollView>
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 }
