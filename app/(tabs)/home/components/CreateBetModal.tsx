@@ -404,14 +404,14 @@ export default function CreateBetModal({ visible, onClose, onCreated }: CreateBe
                 disabled={loading}
                 style={({ pressed }) => ({
                   backgroundColor: colors.primary,
-                  paddingVertical: 14,
+                  paddingVertical: 12,
                   borderRadius: 10,
                   alignItems: 'center',
                   opacity: loading ? 0.5 : pressed ? 0.88 : 1,
                 })}
               >
-                <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.semiBold }}>
-                  {loading ? 'Création…' : 'Créer'}
+                <Text style={{ color: colors.text, fontSize: 14, fontFamily: fonts.semiBold }}>
+                  {loading ? 'CRÉATION…' : 'CRÉER'}
                 </Text>
               </Pressable>
             </View>

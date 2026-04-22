@@ -4,15 +4,7 @@ import type { Option } from '@/domain/entities/Option';
 import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
 import { usePlaceBet } from '@/presentation/hooks/usePlaceBet';
 import React from 'react';
-import {
-  ActivityIndicator,
-  Button,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Bet } from '@/presentation/home/types';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
@@ -146,7 +138,21 @@ export default function PredictBetModal({
       />
 
       <View style={{ marginTop: 15 }}>
-        <Button title="Valider" onPress={handlePredict} color={colors.primary} disabled={busy} />
+        <Pressable
+          onPress={handlePredict}
+          disabled={busy}
+          style={({ pressed }) => ({
+            backgroundColor: colors.primary,
+            paddingVertical: 12,
+            borderRadius: 10,
+            alignItems: 'center',
+            opacity: busy ? 0.5 : pressed ? 0.88 : 1,
+          })}
+        >
+          <Text style={{ color: colors.text, fontSize: 14, fontFamily: fonts.semiBold }}>
+            VALIDER LE PARI
+          </Text>
+        </Pressable>
       </View>
     </BaseModal>
   );

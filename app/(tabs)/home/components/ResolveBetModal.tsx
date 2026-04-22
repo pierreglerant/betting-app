@@ -4,7 +4,7 @@ import type { Option } from '@/domain/entities/Option';
 import { useBetOptionsLoad } from '@/presentation/hooks/useBetOptionsLoad';
 import { useManageBet } from '@/presentation/hooks/useManageBet';
 import React from 'react';
-import { ActivityIndicator, Button, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { Bet } from '@/presentation/home/types';
 import BaseModal from './BaseModal';
 import ModalTitle from './ModalTitle';
@@ -117,12 +117,24 @@ export default function ResolveBetModal({
       ) : null}
 
       <View style={{ marginTop: 16 }}>
-        <Button
-          title={actionLoading ? 'Suppression...' : 'Supprimer le pari'}
+        <Pressable
           onPress={deleteBet}
-          color={colors.danger}
           disabled={disabledActions}
-        />
+          style={({ pressed }) => ({
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderRadius: 10,
+            alignItems: 'center',
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            borderColor: colors.danger,
+            opacity: disabledActions ? 0.5 : pressed ? 0.85 : 1,
+          })}
+        >
+          <Text style={{ color: colors.danger, fontFamily: fonts.semiBold, fontSize: 14 }}>
+            {actionLoading ? 'SUPPRESSION...' : 'SUPPRIMER LE PARI'}
+          </Text>
+        </Pressable>
       </View>
     </BaseModal>
   );
