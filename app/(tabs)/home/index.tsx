@@ -90,7 +90,7 @@ export default function HomeScreen() {
                 marginRight: 12,
               }}
             >
-              <Text style={{ fontFamily: fonts.medium }}>👤</Text>
+              <FontAwesome5 name="user-alt" size={18} color={colors.textMuted} solid />
             </View>
           )}
 

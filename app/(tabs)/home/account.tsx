@@ -180,7 +180,7 @@ export default function AccountScreen() {
                       alignItems: 'center',
                     }}
                   >
-                    <Text style={{ fontFamily: fonts.medium, fontSize: 40 }}>👤</Text>
+                    <FontAwesome5 name="user-alt" size={42} color={colors.textMuted} solid />
                   </View>
                 )}
               </Pressable>
