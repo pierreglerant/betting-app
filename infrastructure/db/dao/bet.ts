@@ -91,35 +91,50 @@ export async function placeBet(userId: string, betId: string, optionId: number, 
 }
 
 export async function createBet(bet: Bet, optionValues: string[], creatorId: string) {
-  // Ne pas omettre p_end_date : sinon PostgREST ne résout pas la surcharge à 5 arguments (PGRST202 / 404).
-  const { data, error } = await supabase.rpc('create_bet', {
-    p_title: bet.title,
-    p_context: bet.context,
-    p_end_date: bet.endDate != null ? bet.endDate.toISOString() : null,
-    p_option_values: optionValues,
-    p_creator_id: creatorId,
+  console.log('[createBet] edge invoke:start', { creatorId, title: bet.title });
+
+  const { data, error } = await supabase.functions.invoke('bet-notifications', {
+    body: {
+      action: 'createBet',
+      title: bet.title,
+      context: bet.context,
+      endDate: bet.endDate != null ? bet.endDate.toISOString() : null,
+      optionValues,
+      creatorId,
+    },
   });
 
   if (error) {
+    console.error('[createBet] edge invoke:error', error);
     throw error;
   }
 
-  if (!data) {
+  console.log('[createBet] edge invoke:response', data);
+
+  if (!data?.betId) {
     throw new Error('Failed to create bet');
   }
 
-  return data;
+  return data.betId as string;
 }
 
 export async function resolveBet(betId: string, winningValue: string) {
-  const { error } = await supabase.rpc('resolve_bet', {
-    p_bet_id: betId,
-    p_winning_value: winningValue,
+  console.log('[resolveBet] edge invoke:start', { betId });
+
+  const { error } = await supabase.functions.invoke('bet-notifications', {
+    body: {
+      action: 'resolveBet',
+      betId,
+      winningValue,
+    },
   });
 
   if (error) {
+    console.error('[resolveBet] edge invoke:error', error);
     throw error;
   }
+
+  console.log('[resolveBet] edge invoke:done', { betId });
 }
 
 export async function deleteBetById(betId: string, requesterId: string) {

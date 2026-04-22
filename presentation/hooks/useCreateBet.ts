@@ -11,12 +11,15 @@ export function useCreateBet() {
     try {
       setLoading(true);
       setError(null);
+      console.log('[createBet] hook:start', { creatorId, title: bet.title });
 
       const id = await createBetUseCase(betRepository, bet, options, creatorId);
+      console.log('[createBet] hook:done', { id });
 
       return id;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error';
+      console.error('[createBet] hook:error', err);
       setError(message);
       throw err;
     } finally {
