@@ -1,13 +1,18 @@
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
-import React from 'react';
-import { Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React from 'react';
+import { Text, View, type ViewStyle } from 'react-native';
 import SectionHeader from '../components/SectionHeader';
 import { useUserStatistics } from '@/presentation/hooks/useUserStatistics';
 
-export default function StatisticsSection({ userId, refreshKey = 0 }) {
-  const cardStyle = {
+type StatisticsSectionProps = {
+  userId: string;
+  refreshKey?: number;
+};
+
+export default function StatisticsSection({ userId, refreshKey = 0 }: StatisticsSectionProps) {
+  const cardStyle: ViewStyle = {
     flex: 1,
     backgroundColor: colors.card,
     borderColor: colors.border,

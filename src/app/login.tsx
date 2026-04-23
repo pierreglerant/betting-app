@@ -1,4 +1,4 @@
-import logo from '@/assets/images/logo.png';
+import logo from '../../assets/images/logo.png';
 import { colors } from '@/constants/theme';
 import { fonts } from '@/constants/typography';
 import { useAuth } from '@/contexts/auth-context';

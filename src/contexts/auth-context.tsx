@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         try {
           parsed = JSON.parse(userData);
-        } catch (e) {
+        } catch {
           console.error('[auth] JSON parse error → clearing storage');
           await AsyncStorage.removeItem('user');
           return;
