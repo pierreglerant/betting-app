@@ -34,7 +34,7 @@ export default function RankingScreen() {
           padding: 20,
         }}
       >
-        <Text style={{ color: colors.error, textAlign: 'center', fontFamily: fonts.semiBold }}>
+        <Text style={{ color: colors.danger, textAlign: 'center', fontFamily: fonts.semiBold }}>
           Erreur : {error}
         </Text>
       </View>
