@@ -8,6 +8,10 @@ import {
 import { mapUser } from '../mappers/user';
 import { mapUserStatisticsDto } from '../mappers/userStatistics';
 
+function hasUserId(row: unknown): row is { id: unknown } & Record<string, unknown> {
+  return Boolean(row && typeof row === 'object' && 'id' in row && row.id);
+}
+
 export const userRepository = {
   async getUserByUsername(username: string) {
     const data = await getUserByUsername(username);
@@ -16,12 +20,12 @@ export const userRepository = {
 
   async getAllUsers() {
     const rows = await getUsers();
-    return rows.filter((r) => r && typeof r === 'object' && r.id).map(mapUser);
+    return rows.filter(hasUserId).map(mapUser);
   },
 
   async getRanking() {
     const rows = await getRanking();
-    return rows.filter((r) => r && typeof r === 'object' && r.id).map(mapUser);
+    return rows.filter(hasUserId).map(mapUser);
   },
 
   async getUserStatistics(userId: string) {
