@@ -34,25 +34,25 @@ jobs:
           EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
           EXPO_PUBLIC_SUPABASE_KEY: dummy-key
 
-    unit-tests:
-      name: Unit tests
-      runs-on: ubuntu-latest
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
 
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-        - name: Setup Node.js
-          uses: actions/setup-node@v6
-          with:
-            node-version: 22
-            cache: npm
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
 
-        - name: Install dependencies
-          run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-        - name: Run unit tests
-          run: npm run test:unit
-          env:
-            EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
-            EXPO_PUBLIC_SUPABASE_KEY: dummy-key
+      - name: Run unit tests
+        run: npm run test:unit
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          EXPO_PUBLIC_SUPABASE_KEY: dummy-key
