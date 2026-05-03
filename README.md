@@ -44,13 +44,13 @@ npm start
 
 Useful scripts:
 
-| Script | Purpose |
-|--------|---------|
-| `npm run android` / `npm run ios` | Local native run |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript check |
-| `npm test` | Jest tests |
-| `npm run static:test` | typecheck + lint + Prettier check |
+| Script                            | Purpose                           |
+| --------------------------------- | --------------------------------- |
+| `npm run android` / `npm run ios` | Local native run                  |
+| `npm run lint`                    | ESLint                            |
+| `npm run typecheck`               | TypeScript check                  |
+| `npm test`                        | Jest tests                        |
+| `npm run static:test`             | typecheck + lint + Prettier check |
 
 ## Stack (overview)
 
