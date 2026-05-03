@@ -1,50 +1,76 @@
-# Welcome to your Expo app 👋
+<div align="center">
+  <img src="./assets/images/logo.png" alt="Betting App logo" width="220" />
+</div>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# Betting App
 
-## Get started
+A mobile app (**Expo / React Native**) for **friendly betting** among a small group using **play money points**, a **leaderboard**, and persistence via **Supabase** (PostgreSQL, auth, storage).
 
-1. Install dependencies
+**Current version: `0.1.0`** — first tracked release of the project.
 
-   ```bash
-   npm install
-   ```
+## Prerequisites
 
-2. Start the app
+- Node.js (LTS recommended)
+- A [Supabase](https://supabase.com) account and project configured for the app
+- For native builds: [EAS CLI](https://docs.expo.dev/build/introduction/) and an Expo account
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Install
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Configuration
 
-## Learn more
+Copy environment variables:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+cp .env.example .env
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Set the following in `.env`:
 
-## Join the community
+- `EXPO_PUBLIC_SUPABASE_URL`
+- `EXPO_PUBLIC_SUPABASE_KEY`
 
-Join our community of developers creating universal apps.
+(Find these in your Supabase project settings.)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Development
+
+```bash
+npm start
+# then pick iOS, Android, or a dev client depending on your setup
+```
+
+Useful scripts:
+
+| Script | Purpose |
+|--------|---------|
+| `npm run android` / `npm run ios` | Local native run |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript check |
+| `npm test` | Jest tests |
+| `npm run static:test` | typecheck + lint + Prettier check |
+
+## Stack (overview)
+
+- **Expo SDK 54**, **Expo Router** (typed routes)
+- **TypeScript**, **TanStack Query**
+- **Onion** architecture (domain / use cases at the core) — see `architecture-betting-app.html` for the visual overview
+
+## Release `v0.1.0`
+
+Initial baseline: friendly betting flows, Supabase integration, main screens; unit tests and CI workflow (`.github/workflows/ci.yml`).
+
+After you have verified everything:
+
+```bash
+git tag -a v0.1.0 -m "Release v0.1.0"
+git push origin v0.1.0
+```
+
+Production builds: `production` / `preview` profiles in `eas.json`; see [EAS Build](https://docs.expo.dev/build/introduction/).
+
+## License
+
+Private project (`private: true` in `package.json`).
